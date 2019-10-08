@@ -1,2 +1,0 @@
-py2neo==4.2.0
-pydriller==1.7
