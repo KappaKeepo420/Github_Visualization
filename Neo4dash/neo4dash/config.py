@@ -15,26 +15,25 @@
 """This module stores all config constants. It is a singleton
 because it is used across in several modules inside the app"""
 
-from neo4dash.singleton import Singleton
+from singleton import Singleton
 
 
 class Config(metaclass=Singleton):
-  """This class contains all config flags"""
-  DB_URL = ""
-  PORT = 0
-  DB_USER = ""
-  DB_PWD = ""
+    """This class contains all config flags"""
+    DB_URL = ""
+    PORT = 0
+    DB_USER = ""
+    DB_PWD = ""
 
+    def check_config(self):
+        """Checks if the config properties are set and
+        raises ValueError if any value misses"""
 
-  def check_config(self):
-    """Checks if the config properties are set and
-    raises ValueError if any value misses"""
+        if self.DB_URL == "":
+            raise ValueError("Database URL is not set.")
 
-    if self.DB_URL == "":
-      raise ValueError("Database URL is not set.")
+        if self.PORT == 0:
+            raise ValueError("Database port is not set.")
 
-    if self.PORT == 0:
-      raise ValueError("Database port is not set.")
-
-    if self.DB_USER == "" or self.DB_PWD == "":
-      raise ValueError("Database credentials are not set.")
+        if self.DB_USER == "" or self.DB_PWD == "":
+            raise ValueError("Database credentials are not set.")

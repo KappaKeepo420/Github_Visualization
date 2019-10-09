@@ -20,7 +20,7 @@ import dash_html_components as html
 
 from dash.dependencies import Input, Output
 
-from neo4dash.db import Database
+from db import Database
 
 
 DB_URL = 'localhost'
@@ -139,59 +139,59 @@ app.layout = html.Div([
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
-  return {
-      'name': layout,
-      'animate': True
-  }
+    return {
+        'name': layout,
+        'animate': True
+    }
 
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
 def displayTapNode(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
 def displayTapEdge(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('tap-node-data-json-output', 'children'),
               [Input('cytoscape', 'tapNodeData')])
 def displayTapNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('tap-edge-data-json-output', 'children'),
               [Input('cytoscape', 'tapEdgeData')])
 def displayTapEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('mouseover-node-data-json-output', 'children'),
               [Input('cytoscape', 'mouseoverNodeData')])
 def displayMouseoverNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('mouseover-edge-data-json-output', 'children'),
               [Input('cytoscape', 'mouseoverEdgeData')])
 def displayMouseoverEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('selected-node-data-json-output', 'children'),
               [Input('cytoscape', 'selectedNodeData')])
 def displaySelectedNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('selected-edge-data-json-output', 'children'),
               [Input('cytoscape', 'selectedEdgeData')])
 def displaySelectedEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+    app.run_server(debug=True)

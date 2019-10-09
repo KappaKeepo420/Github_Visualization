@@ -14,7 +14,8 @@
 """This module holds queries that can not be formulated
 with py2neo objects."""
 
-from neo4dash.singleton import Singleton
+from singleton import Singleton
+
 
 class Queries(metaclass=Singleton):
-  pass
+    pass
