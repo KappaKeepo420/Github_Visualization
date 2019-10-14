@@ -98,6 +98,48 @@ class Database(metaclass=Singleton):
         else:
             return nodes+rels
 
+    def _find_children(self, nodes, rels, node):
+        #return nodes, rels
+
+        # find relations with node as source
+        relations = []
+        for x in rels:
+            if x['data']['source'] == node['data']['id']: # TODO support more days
+                relations.append(x)
+
+        target_ids = [x['data']['target'] for x in relations]
+        children_nodes = []
+        for id in target_ids:
+            for no in nodes:
+                if id == no['data']['id']:
+
+                    #TODO: LOOPS SHOULD'NT BE POSSIBLE????
+                    if no in children_nodes:
+                        break
+
+                    children_nodes.append(no)
+                    n, r = self._find_children(nodes, rels, no)
+                    children_nodes += n
+                    relations += r
+
+
+        return children_nodes, relations
+
+    def filter_by_day(self, day):
+        nodes, rels = self.get_all_data(merge = False)
+
+        date_nodes = [x for x in nodes if x['data']['type'] == 'Day']
+        date = [x for x in date_nodes if x['data']['name'] == day]
+
+        result_nodes = date.copy()
+        result_relations = []
+        for x in date:
+            n, r = self._find_children(nodes, rels, x)
+            result_nodes += n
+            result_relations += r
+
+        return result_nodes + result_relations
+
     def _map_node(self, node):
         """Maps Neo4j Node to UI element
         :param node: dictionary with node elements
