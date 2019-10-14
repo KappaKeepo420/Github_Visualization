@@ -112,11 +112,6 @@ class Database(metaclass=Singleton):
         for id in target_ids:
             for no in nodes:
                 if id == no['data']['id']:
-
-                    #TODO: LOOPS SHOULD'NT BE POSSIBLE????
-                    if no in children_nodes:
-                        break
-
                     children_nodes.append(no)
                     n, r = self._find_children(nodes, rels, no)
                     children_nodes += n
