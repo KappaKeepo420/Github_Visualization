@@ -98,7 +98,7 @@ class Database(metaclass=Singleton):
         else:
             return nodes+rels
 
-    def _find_children(self, nodes, rels, node):
+     def _find_children(self, nodes, rels, node):
         #return nodes, rels
 
         # find relations with node as source
@@ -117,7 +117,6 @@ class Database(metaclass=Singleton):
                     children_nodes += n
                     relations += r
 
-
         return children_nodes, relations
 
     def filter_by_day(self, day):
@@ -135,6 +134,39 @@ class Database(metaclass=Singleton):
 
         return result_nodes + result_relations
 
+    def filter_by_month(self, month):
+        nodes, rels = self.get_all_data(merge = False)
+
+        for node in nodes:
+            print(node['data']['type'])
+
+        date_nodes = [x for x in nodes if x['data']['type'] == 'Month']
+        date = [x for x in date_nodes if x['data']['name'] == month]
+
+        result_nodes = date.copy()
+        result_relations = []
+        for x in date:
+            n, r = self._find_children(nodes, rels, x)
+            result_nodes += n
+            result_relations += r
+
+        return result_nodes + result_relations
+
+    def filter_by_year(self, year):
+        nodes, rels = self.get_all_data(merge = False)
+
+        date_nodes = [x for x in nodes if x['data']['type'] == 'Year']
+        date = [x for x in date_nodes if x['data']['name'] == year]
+
+        result_nodes = date.copy()
+        result_relations = []
+        for x in date:
+            n, r = self._find_children(nodes, rels, x)
+            result_nodes += n
+            result_relations += r
+
+        return result_nodes + result_relations
+        
     def _map_node(self, node):
         """Maps Neo4j Node to UI element
         :param node: dictionary with node elements
