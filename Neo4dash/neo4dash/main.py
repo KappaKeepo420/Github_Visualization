@@ -37,6 +37,7 @@ db.configure(
     db_user=DB_USER,
     db_pwd=DB_PWD,
 )
+
 data = db.get_all_data(merge=True)
 
 styles = {
@@ -50,20 +51,72 @@ styles = {
 
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
-        dcc.Dropdown(
-            id='dropdown-update-layout',
-            value='grid',
-            clearable=False,
-            options=[
-                {'label': name.capitalize(), 'value': name}
-                for name in ['grid', 'random', 'circle', 'cose', 'concentric']
-            ]),
+		html.Div(className='nine columns', children=[
+		    dcc.Dropdown(
+		        id='dropdown-update-layout',
+		        value='grid',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',					
+		            'display' : 'inline-block'
+		        },   
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-day',
+		        value='Select day',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block',
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+									'23', '24', '25', '26', '27', '28', '29', '30', '31']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-month',
+		        value='Select month',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-year',
+		        value='Select year',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select year', '2017', '2018', '2019']
+		        ]),
+			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
+				style={'display' : 'inline-block', 
+						'color': '#4544ae',
+						'padding-left': '100px',
+						}),
+		]),
         cyto.Cytoscape(
             id='cytoscape',
             layout={'name': 'grid'},
             elements=data,
             style={
-                'height': '60vh',
+                'height': '80vh',
                 'width': '100%'
             },
         )
@@ -100,7 +153,6 @@ app.layout = html.Div([
                     )
                 ])
             ]),
-
             dcc.Tab(label='Mouseover Data', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Data JSON:'),
@@ -136,6 +188,7 @@ app.layout = html.Div([
 
 
 # Update layout
+
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
