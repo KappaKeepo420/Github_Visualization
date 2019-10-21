@@ -26,7 +26,7 @@ from db import Database
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'Len31_01'
 
 app = dash.Dash(__name__)
 
@@ -58,9 +58,9 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',					
+					'width': '30vh',
 		            'display' : 'inline-block'
-		        },   
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
@@ -73,7 +73,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block',
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
@@ -87,7 +87,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
@@ -100,13 +100,13 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
-			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
-				style={'display' : 'inline-block', 
+			html.Div( dcc.Markdown('''# **Github Visualization**'''),
+				style={'display' : 'inline-block',
 						'color': '#4544ae',
 						'padding-left': '100px',
 						}),
