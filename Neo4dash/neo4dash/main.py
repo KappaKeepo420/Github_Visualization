@@ -26,7 +26,7 @@ from db import Database
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'Len31_01'
+DB_PWD = 'se'
 
 app = dash.Dash(__name__)
 
@@ -39,6 +39,10 @@ db.configure(
 )
 
 data = db.get_all_data(merge=True)
+
+db.list_dev_last(db.list_dev_ids())
+
+
 
 styles = {
     'json-output': {
