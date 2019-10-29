@@ -78,8 +78,9 @@ class Developers():
             entry += str(self.dev_last_active(dev))
             print(entry)
             entry = ""
-    # def dev_get_activity(self, dev_id):
-    #     nodes, rels = self.get_all_data(merge = False)
-    #     commits = self.get_rels_type(dev_id, 'Commit')
-    #
-    #     temp = sorted(commits, key = lambda x: x['data'][''])
+
+    def dev_get_activity(self, dev_id):
+
+        commits = self.get_rels_type(dev_id, 'Commit')
+        #print(commits)
+        temp = sorted(commits, key = lambda x: x['data'][''])
