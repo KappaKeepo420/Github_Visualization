@@ -22,7 +22,7 @@ from dash.dependencies import Input, Output
 
 from db import Database
 import filter
-import developer as dev
+import developers
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -43,13 +43,11 @@ data = db.get_all_data(merge=True)
 nodes, relations = db.get_all_data(merge=False)
 n, r = filter.filter_by_year(nodes, relations, 2018)
 data = n + r
-db.dev_last_active('37')
-print (len(n))
-print (len(r))
 
-db.list_dev_last(db.list_dev_ids())
+dev = developers.Developers(nodes, relations)
 
-
+dev.print_dev_last(dev.list_dev_ids())
+dev.dev_get_activity('37')
 
 styles = {
     'json-output': {
