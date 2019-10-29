@@ -22,6 +22,7 @@ from dash.dependencies import Input, Output
 
 from db import Database
 import filter
+import developer as dev
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -39,6 +40,12 @@ db.configure(
 )
 
 data = db.get_all_data(merge=True)
+nodes, relations = db.get_all_data(merge=False)
+n, r = filter.filter_by_year(nodes, relations, 2018)
+data = n + r
+db.dev_last_active('37')
+print (len(n))
+print (len(r))
 
 styles = {
     'json-output': {
@@ -58,9 +65,9 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',					
+					'width': '30vh',
 		            'display' : 'inline-block'
-		        },   
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
@@ -73,7 +80,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block',
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
@@ -87,7 +94,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
@@ -100,13 +107,13 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
-			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
-				style={'display' : 'inline-block', 
+			html.Div( dcc.Markdown('''# **Github Visualization**'''),
+				style={'display' : 'inline-block',
 						'color': '#4544ae',
 						'padding-left': '100px',
 						}),

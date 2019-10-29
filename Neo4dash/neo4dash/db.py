@@ -24,7 +24,6 @@ from datetime import date
 LG = Logger()
 QR = Queries()
 
-
 class Database(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         """Instantiates a database object"""
@@ -150,6 +149,7 @@ class Database(metaclass=Singleton):
         nodes, rels = self.get_all_data(merge = False)
 
         commits = self.get_rels_type(dev_id, 'Commit')
+        print(commits)
         recent = self.get_date_commit(commits[0]['data']['id'])
 
         for x in commits:
@@ -159,6 +159,12 @@ class Database(metaclass=Singleton):
                 recent = y
 
         return recent
+
+    # def dev_get_activity(self, dev_id):
+    #     nodes, rels = self.get_all_data(merge = False)
+    #     commits = self.get_rels_type(dev_id, 'Commit')
+    #
+    #     temp = sorted(commits, key = lambda x: x['data'][''])
 
     def _map_node(self, node):
         """Maps Neo4j Node to UI element

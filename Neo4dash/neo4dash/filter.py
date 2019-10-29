@@ -1,4 +1,5 @@
 def _find_children(nodes, relations, result_nodes, result_relations, node):
+
     for x in relations:
         if x['data']['source'] == node['data']['id']:
             if x not in result_relations:
@@ -7,6 +8,7 @@ def _find_children(nodes, relations, result_nodes, result_relations, node):
     target_ids = [x['data']['target'] for x in result_relations]
 
     target_nodes = []
+
     for id in target_ids:
         for no in nodes:
             if id == no['data']['id']:
@@ -16,7 +18,7 @@ def _find_children(nodes, relations, result_nodes, result_relations, node):
         if target not in result_nodes:
             result_nodes.append(target)
             _find_children(nodes, relations, result_nodes, result_relations, target)
-            
+
 def _filter_by(nodes, relations, filter_nodes):
     result_nodes = []
     result_relations = []
