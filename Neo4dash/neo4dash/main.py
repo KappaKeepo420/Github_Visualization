@@ -20,8 +20,8 @@ import dash_html_components as html
 
 from dash.dependencies import Input, Output
 
-from neo4dash.db import Database
-
+from db import Database
+import filter
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -37,34 +37,87 @@ db.configure(
     db_user=DB_USER,
     db_pwd=DB_PWD,
 )
+
 data = db.get_all_data(merge=True)
 
 styles = {
     'json-output': {
         'overflow-y': 'scroll',
         'height': 'calc(50% - 25px)',
-        'border': 'thin lightgrey solid'
+        'border': 'thin lightgrey solid',
     },
     'tab': {'height': 'calc(98vh - 115px)'}
 }
 
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
-        dcc.Dropdown(
-            id='dropdown-update-layout',
-            value='grid',
-            clearable=False,
-            options=[
-                {'label': name.capitalize(), 'value': name}
-                for name in ['grid', 'random', 'circle', 'cose', 'concentric']
-            ]),
+		html.Div(className='nine columns', children=[
+		    dcc.Dropdown(
+		        id='dropdown-update-layout',
+		        value='grid',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',					
+		            'display' : 'inline-block'
+		        },   
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-day',
+		        value='Select day',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block',
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+									'23', '24', '25', '26', '27', '28', '29', '30', '31']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-month',
+		        value='Select month',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-year',
+		        value='Select year',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },            
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select year', '2017', '2018', '2019']
+		        ]),
+			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
+				style={'display' : 'inline-block', 
+						'color': '#4544ae',
+						'padding-left': '100px',
+						}),
+		]),
         cyto.Cytoscape(
             id='cytoscape',
             layout={'name': 'grid'},
             elements=data,
             style={
-                'height': '60vh',
-                'width': '100%'
+                'height': '80vh',
+                'width': '100%',
             },
         )
     ]),
@@ -86,6 +139,22 @@ app.layout = html.Div([
                 ])
             ]),
 
+            dcc.Tab(label='Developer Information', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name:'),
+                    html.Pre(
+                        id='developer-output'
+                    ),
+                ])
+            ]),
+
+            dcc.Tab(label='List of active developers', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name and last activity:'),
+                ])
+            ]),
+
+
             dcc.Tab(label='Tap Data', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Data JSON:'),
@@ -100,7 +169,6 @@ app.layout = html.Div([
                     )
                 ])
             ]),
-
             dcc.Tab(label='Mouseover Data', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Data JSON:'),
@@ -136,62 +204,75 @@ app.layout = html.Div([
 
 
 # Update layout
+
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
-  return {
-      'name': layout,
-      'animate': True
-  }
+    return {
+        'name': layout,
+        'animate': True
+    }
 
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
 def displayTapNode(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
+
+#TO-DO: Show developer name
+'''
+@app.callback(Output('developer-output', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDeveloper(data):
+	if data['data']['type'] == 'Developer':
+		#return data['data']['Id']
+		return 'jawel'
+	else:
+		pass
+'''
 
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
 def displayTapEdge(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('tap-node-data-json-output', 'children'),
               [Input('cytoscape', 'tapNodeData')])
 def displayTapNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('tap-edge-data-json-output', 'children'),
               [Input('cytoscape', 'tapEdgeData')])
 def displayTapEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('mouseover-node-data-json-output', 'children'),
               [Input('cytoscape', 'mouseoverNodeData')])
 def displayMouseoverNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('mouseover-edge-data-json-output', 'children'),
               [Input('cytoscape', 'mouseoverEdgeData')])
 def displayMouseoverEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('selected-node-data-json-output', 'children'),
               [Input('cytoscape', 'selectedNodeData')])
 def displaySelectedNodeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 @app.callback(Output('selected-edge-data-json-output', 'children'),
               [Input('cytoscape', 'selectedEdgeData')])
 def displaySelectedEdgeData(data):
-  return json.dumps(data, indent=2)
+    return json.dumps(data, indent=2)
 
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+    app.run_server(debug=True)

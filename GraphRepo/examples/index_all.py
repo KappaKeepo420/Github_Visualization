@@ -18,8 +18,8 @@ from datetime import datetime
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'Len31_01'
-REPO = '../twitter-scraper/'
+DB_PWD = 'letmein'
+REPO = 'pydriller/'
 START_DATE = datetime(2018, 2, 1)
 END_DATE = datetime(2018, 3, 30)
 # START_DATE = None
