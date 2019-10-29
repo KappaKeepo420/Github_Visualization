@@ -40,6 +40,10 @@ db.configure(
 
 data = db.get_all_data(merge=True)
 
+db.list_dev_last(db.list_dev_ids())
+
+
+
 styles = {
     'json-output': {
         'overflow-y': 'scroll',

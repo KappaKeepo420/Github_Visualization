@@ -99,16 +99,27 @@ class Database(metaclass=Singleton):
         else:
             return nodes+rels
 
-    def list_devs(self):
+    def list_dev_ids(self):
+
         nodes, rels = self.get_all_data(merge = False)
         dev_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
         arr = []
 
         for x in dev_nodes:
-            arr.append(x['data']['name'])
+            arr.append(x['data']['id'])
 
         return arr
 
+    def get_dev_name(self, dev_id):
+        nodes, rels = self.get_all_data(merge = False)
+        dev_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
+
+        for x in dev_nodes:
+            if x['data']['id'] == dev_id:
+                dev_name = x['data']['label']
+
+        return dev_name
+      
     def get_rels_type(self, id, type):
         nodes, rels = self.get_all_data(merge = False)
         rel = []
@@ -145,11 +156,33 @@ class Database(metaclass=Singleton):
 
         return date(year, month, day)
 
-
     def dev_last_active(self, dev_id):
         nodes, rels = self.get_all_data(merge = False)
 
         commits = self.get_rels_type(dev_id, 'Commit')
+        recent = 0
+
+        for x in commits:
+            y = self.get_date_commit(x['data']['id'])
+            if not recent and x:
+                recent = y
+            elif y > recent:
+                recent = y
+        
+        return recent
+
+    def list_dev_last(self, dev_id_list):
+        nodes, rels = self.get_all_data(merge = False)
+        entry = ""
+        counter = 0
+        for dev in dev_id_list:
+            counter += 1
+            dev_name = self.get_dev_name(dev)
+            entry += dev_name + ": "
+            entry += str(self.dev_last_active(dev))
+            print(entry)
+            entry = ""
+
         recent = self.get_date_commit(commits[0]['data']['id'])
 
         for x in commits:
