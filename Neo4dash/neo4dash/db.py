@@ -100,6 +100,7 @@ class Database(metaclass=Singleton):
             return nodes+rels
 
     def list_dev_ids(self):
+
         nodes, rels = self.get_all_data(merge = False)
         dev_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
         arr = []
@@ -118,8 +119,7 @@ class Database(metaclass=Singleton):
                 dev_name = x['data']['label']
 
         return dev_name
-
-
+      
     def get_rels_type(self, id, type):
         nodes, rels = self.get_all_data(merge = False)
         rel = []
@@ -147,15 +147,14 @@ class Database(metaclass=Singleton):
     def get_date_commit(self, commit_id):
         nodes, rels = self.get_all_data(merge = False)
 
-        node = self.date_helper('Day', commit_id)
+        node = self.datehelper('Day', commit_id)
         day = node['data']['label']
-        node = self.date_helper('Month', node['data']['id'])
+        node = self.datehelper('Month', node['data']['id'])
         month = node['data']['label']
-        node = self.date_helper('Year', node['data']['id'])
+        node = self.datehelper('Year', node['data']['id'])
         year = node['data']['label']
 
         return date(year, month, day)
-
 
     def dev_last_active(self, dev_id):
         nodes, rels = self.get_all_data(merge = False)
@@ -184,6 +183,15 @@ class Database(metaclass=Singleton):
             print(entry)
             entry = ""
 
+        recent = self.get_date_commit(commits[0]['data']['id'])
+
+        for x in commits:
+            y = self.get_date_commit(x['data']['id'])
+
+            if y > recent:
+                recent = y
+
+        return recent
 
     def _map_node(self, node):
         """Maps Neo4j Node to UI element
