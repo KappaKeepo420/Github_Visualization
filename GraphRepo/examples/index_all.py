@@ -19,12 +19,12 @@ DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
 DB_PWD = 'letmein'
+
 REPO = 'twitter-scraper/'
 START_DATE = datetime(2018, 2, 1)
 END_DATE = datetime(2018, 3, 30)
 # START_DATE = None
 # END_DATE = None
-
 
 def main():
   driller = Driller()

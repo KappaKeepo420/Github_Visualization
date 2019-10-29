@@ -47,6 +47,10 @@ db.dev_last_active('37')
 print (len(n))
 print (len(r))
 
+db.list_dev_last(db.list_dev_ids())
+
+
+
 styles = {
     'json-output': {
         'overflow-y': 'scroll',
