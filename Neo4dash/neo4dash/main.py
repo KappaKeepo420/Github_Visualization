@@ -21,12 +21,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from db import Database
-
+import filter
 
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'Len31_01'
+DB_PWD = 'letmein'
 
 app = dash.Dash(__name__)
 
@@ -44,7 +44,7 @@ styles = {
     'json-output': {
         'overflow-y': 'scroll',
         'height': 'calc(50% - 25px)',
-        'border': 'thin lightgrey solid'
+        'border': 'thin lightgrey solid',
     },
     'tab': {'height': 'calc(98vh - 115px)'}
 }
@@ -58,9 +58,9 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '30vh',					
 		            'display' : 'inline-block'
-		        },
+		        },   
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
@@ -73,7 +73,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block',
-		        },
+		        },            
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
@@ -87,7 +87,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },
+		        },            
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
@@ -100,13 +100,13 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },
+		        },            
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
-			html.Div( dcc.Markdown('''# **Github Visualization**'''),
-				style={'display' : 'inline-block',
+			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
+				style={'display' : 'inline-block', 
 						'color': '#4544ae',
 						'padding-left': '100px',
 						}),
@@ -117,7 +117,7 @@ app.layout = html.Div([
             elements=data,
             style={
                 'height': '80vh',
-                'width': '100%'
+                'width': '100%',
             },
         )
     ]),
@@ -138,6 +138,22 @@ app.layout = html.Div([
                     )
                 ])
             ]),
+
+            dcc.Tab(label='Developer Information', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name:'),
+                    html.Pre(
+                        id='developer-output'
+                    ),
+                ])
+            ]),
+
+            dcc.Tab(label='List of active developers', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name and last activity:'),
+                ])
+            ]),
+
 
             dcc.Tab(label='Tap Data', children=[
                 html.Div(style=styles['tab'], children=[
@@ -203,6 +219,18 @@ def update_layout(layout):
 def displayTapNode(data):
     return json.dumps(data, indent=2)
 
+
+#TO-DO: Show developer name
+'''
+@app.callback(Output('developer-output', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDeveloper(data):
+	if data['data']['type'] == 'Developer':
+		#return data['data']['Id']
+		return 'jawel'
+	else:
+		pass
+'''
 
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
