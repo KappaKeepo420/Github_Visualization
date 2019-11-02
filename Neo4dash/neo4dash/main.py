@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'jawel'
 
 app = dash.Dash(__name__)
 
@@ -47,7 +47,7 @@ data = n + r
 dev = developers.Developers(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
-dev.dev_get_activity('37')
+#dev.dev_get_activity('37')
 
 styles = {
     'json-output': {
@@ -160,6 +160,10 @@ app.layout = html.Div([
             dcc.Tab(label='List of active developers', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Developer name and last activity:'),
+                    html.Pre(
+                        id='all-developers',
+
+                    ),
                 ])
             ]),
 
@@ -228,6 +232,11 @@ def update_layout(layout):
 def displayTapNode(data):
     return json.dumps(data, indent=2)
 
+@app.callback(Output('all-developers', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDevs(data):
+	dev = developers.Developers(nodes, relations)
+	return dev.print_dev_last(dev.list_dev_ids())
 
 #TO-DO: Show developer name
 '''
