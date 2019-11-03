@@ -69,6 +69,7 @@ class Developers():
 
     def print_dev_last(self, dev_id_list):
         entry = ""
+        result = [ ]
         counter = 0
 
         for dev in dev_id_list:
@@ -76,8 +77,12 @@ class Developers():
             dev_name = self.get_dev_name(dev)
             entry += dev_name + ": "
             entry += str(self.dev_last_active(dev))
-            print(entry)
+            entry += "\n"
+            result.append(entry)
+            #print(entry)
             entry = ""
+
+        return result
 
     def dev_get_activity(self, dev_id):
 
