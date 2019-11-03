@@ -226,6 +226,32 @@ def update_layout(layout):
         'animate': True
     }
 
+@app.callback(Output('cytoscape', 'elements'),
+              [Input('dropdown-slider-day', 'value'),
+                Input('dropdown-slider-month', 'value'),
+                Input('dropdown-slider-year', 'value')],)
+def update_layout2(days, months, years):
+    months_int = int(months)
+    days_int = int(days)
+    years_int = int(years)
+    nodes, relations = db.get_all_data(merge=False)
+    if years == 'Select year':
+        data = nodes + relations
+    else:
+        n_year, r_year = filter.filter_by_year(nodes, relations, years_int)
+
+    if months == 'Select month':
+        data = n_year + r_year
+    else:
+        n_month, r_month = filter.filter_by_month(n_year, r_year, months_int)
+
+    if days == 'Select day':
+        data = n_month, r_month
+    else:
+        n_day, r_day = filter.filter_by_day(n_month, r_month, days_int)
+        data = n_day + r_day
+
+    return data
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
