@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'jawel'
+DB_PWD = 'letmein'
 
 app = dash.Dash(__name__)
 
@@ -231,25 +231,28 @@ def update_layout(layout):
                 Input('dropdown-slider-month', 'value'),
                 Input('dropdown-slider-year', 'value')],)
 def update_layout2(days, months, years):
-    months_int = int(months)
-    days_int = int(days)
-    years_int = int(years)
+
     nodes, relations = db.get_all_data(merge=False)
-    if years == 'Select year':
-        data = nodes + relations
-    else:
-        n_year, r_year = filter.filter_by_year(nodes, relations, years_int)
 
-    if months == 'Select month':
-        data = n_year + r_year
-    else:
-        n_month, r_month = filter.filter_by_month(n_year, r_year, months_int)
+    try:
+        y = int(years)
+        nodes, relations = filter.filter_by_year(nodes, relations, y)
+    except ValueError:
+        pass
 
-    if days == 'Select day':
-        data = n_month, r_month
-    else:
-        n_day, r_day = filter.filter_by_day(n_month, r_month, days_int)
-        data = n_day + r_day
+    try:
+        m = int(months)
+        nodes, relations = filter.filter_by_month(nodes, relations, m)
+    except ValueError:
+        pass
+
+    try:
+        d = int(days)
+        nodes, relations = filter.filter_by_day(nodes, relations, d)
+    except ValueError:
+        pass
+
+    data = nodes + relations
 
     return data
 
