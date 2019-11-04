@@ -21,12 +21,13 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from db import Database
-
+import filter
+import developers
 
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'jawel'
 
 app = dash.Dash(__name__)
 
@@ -37,34 +38,95 @@ db.configure(
     db_user=DB_USER,
     db_pwd=DB_PWD,
 )
+
 data = db.get_all_data(merge=True)
+nodes, relations = db.get_all_data(merge=False)
+n, r = filter.filter_by_year(nodes, relations, 2018)
+data = n + r
+
+dev = developers.Developers(nodes, relations)
+
+dev.print_dev_last(dev.list_dev_ids())
+#dev.dev_get_activity('37')
 
 styles = {
     'json-output': {
         'overflow-y': 'scroll',
         'height': 'calc(50% - 25px)',
-        'border': 'thin lightgrey solid'
+        'border': 'thin lightgrey solid',
     },
     'tab': {'height': 'calc(98vh - 115px)'}
 }
 
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
-        dcc.Dropdown(
-            id='dropdown-update-layout',
-            value='grid',
-            clearable=False,
-            options=[
-                {'label': name.capitalize(), 'value': name}
-                for name in ['grid', 'random', 'circle', 'cose', 'concentric']
-            ]),
+		html.Div(className='nine columns', children=[
+		    dcc.Dropdown(
+		        id='dropdown-update-layout',
+		        value='grid',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-day',
+		        value='Select day',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block',
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+									'23', '24', '25', '26', '27', '28', '29', '30', '31']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-month',
+		        value='Select month',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-year',
+		        value='Select year',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '30vh',
+		            'display' : 'inline-block'
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select year', '2017', '2018', '2019']
+		        ]),
+			html.Div( dcc.Markdown('''# **Github Visualization**'''),
+				style={'display' : 'inline-block',
+						'color': '#4544ae',
+						'padding-left': '100px',
+						}),
+		]),
         cyto.Cytoscape(
             id='cytoscape',
             layout={'name': 'grid'},
             elements=data,
             style={
-                'height': '60vh',
-                'width': '100%'
+                'height': '80vh',
+                'width': '100%',
             },
         )
     ]),
@@ -86,6 +148,26 @@ app.layout = html.Div([
                 ])
             ]),
 
+            dcc.Tab(label='Developer Information', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name:'),
+                    html.Pre(
+                        id='developer-output'
+                    ),
+                ])
+            ]),
+
+            dcc.Tab(label='List of active developers', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('Developer name and last activity:'),
+                    html.Pre(
+                        id='all-developers',
+
+                    ),
+                ])
+            ]),
+
+
             dcc.Tab(label='Tap Data', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Data JSON:'),
@@ -100,7 +182,6 @@ app.layout = html.Div([
                     )
                 ])
             ]),
-
             dcc.Tab(label='Mouseover Data', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Data JSON:'),
@@ -136,6 +217,7 @@ app.layout = html.Div([
 
 
 # Update layout
+
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
@@ -144,12 +226,55 @@ def update_layout(layout):
         'animate': True
     }
 
+@app.callback(Output('cytoscape', 'elements'),
+              [Input('dropdown-slider-day', 'value'),
+                Input('dropdown-slider-month', 'value'),
+                Input('dropdown-slider-year', 'value')],)
+def update_layout2(days, months, years):
+    months_int = int(months)
+    days_int = int(days)
+    years_int = int(years)
+    nodes, relations = db.get_all_data(merge=False)
+    if years == 'Select year':
+        data = nodes + relations
+    else:
+        n_year, r_year = filter.filter_by_year(nodes, relations, years_int)
+
+    if months == 'Select month':
+        data = n_year + r_year
+    else:
+        n_month, r_month = filter.filter_by_month(n_year, r_year, months_int)
+
+    if days == 'Select day':
+        data = n_month, r_month
+    else:
+        n_day, r_day = filter.filter_by_day(n_month, r_month, days_int)
+        data = n_day + r_day
+
+    return data
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
 def displayTapNode(data):
     return json.dumps(data, indent=2)
 
+@app.callback(Output('all-developers', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDevs(data):
+	dev = developers.Developers(nodes, relations)
+	return dev.print_dev_last(dev.list_dev_ids())
+
+#TO-DO: Show developer name
+'''
+@app.callback(Output('developer-output', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDeveloper(data):
+	if data['data']['type'] == 'Developer':
+		#return data['data']['Id']
+		return 'jawel'
+	else:
+		pass
+'''
 
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])

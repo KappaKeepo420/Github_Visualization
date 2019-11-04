@@ -19,10 +19,10 @@ from config import Config
 from logger import Logger
 from queries import Queries
 from py2neo import Graph, NodeMatcher, RelationshipMatcher
+from datetime import date
 
 LG = Logger()
 QR = Queries()
-
 
 class Database(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
