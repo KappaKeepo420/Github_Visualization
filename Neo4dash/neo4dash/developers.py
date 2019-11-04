@@ -1,9 +1,50 @@
-from datetime import date
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 
 class Developers():
     def __init__(self, nodes, rels):
         self.nodes = nodes
         self.rels = rels
+
+    def daterange(self, start_date, end_date):
+        for n in range(int ((end_date - start_date).days)):
+            yield start_date + timedelta(n)
+
+    def get_period_dates(self, time_period):
+        dates = []
+        today = date.today()
+
+        if time_period == "day":
+            t = relativedelta(days=-1)
+        elif time_period == "week":
+            t = relativedelta(weeks=-1)
+        elif time_period == "month":
+            t = relativedelta(months=-1)
+        elif time_period == "year":
+            t = relativedelta(years=-1)
+        # print("today - ", time_period, ":", today + t)
+
+        start_date = today + t
+        # print(start_date, today)
+        for single_date in daterange(start_date, today)
+            print(single_date)
+
+        # return 
+
+    def activity_last_x(self, time_period):
+
+
+        self.get_period_dates(time_period)
+
+        # last_nodes = []
+        # last_rels = []
+        # last_nodes, last_rels = filter_function(last_nodes, last_rels)
+
+
+        # return last_nodes, last_rels
+
+
+
 
     def list_dev_ids(self):
         dev_nodes = [x for x in self.nodes if x['data']['type'] == 'Developer']

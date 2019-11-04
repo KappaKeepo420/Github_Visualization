@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'jawel'
+DB_PWD = 'se'
 
 app = dash.Dash(__name__)
 
@@ -48,6 +48,13 @@ dev = developers.Developers(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
 #dev.dev_get_activity('37')
+
+# dev.activity_last_x("day")
+# dev.activity_last_x("week")
+dev.activity_last_x("month")
+# dev.activity_last_x("year")
+
+
 
 styles = {
     'json-output': {
