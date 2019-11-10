@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'jawel'
 
 app = dash.Dash(__name__)
 
@@ -167,6 +167,12 @@ app.layout = html.Div([
                 ])
             ]),
 
+            dcc.Tab(label='List of files', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('File names and number of commits: '),
+
+                ])
+            ]),
 
             dcc.Tab(label='Tap Data', children=[
                 html.Div(style=styles['tab'], children=[
