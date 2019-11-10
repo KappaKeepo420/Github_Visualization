@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'jawel'
+DB_PWD = 'letmein'
 
 app = dash.Dash(__name__)
 
@@ -72,7 +72,7 @@ app.layout = html.Div([
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
-		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-day',
