@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'jawel'
+DB_PWD = 'letmein'
 
 app = dash.Dash(__name__)
 
