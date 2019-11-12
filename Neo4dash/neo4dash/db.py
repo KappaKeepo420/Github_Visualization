@@ -24,7 +24,6 @@ from datetime import date
 LG = Logger()
 QR = Queries()
 
-
 class Database(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         """Instantiates a database object"""
@@ -98,67 +97,6 @@ class Database(metaclass=Singleton):
             return nodes, rels
         else:
             return nodes+rels
-
-    def list_devs(self):
-        nodes, rels = self.get_all_data(merge = False)
-        dev_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
-        arr = []
-
-        for x in dev_nodes:
-            arr.append(x['data']['name'])
-
-        return arr
-
-    def get_rels_type(self, id, type):
-        nodes, rels = self.get_all_data(merge = False)
-        rel = []
-
-        for x in rels:
-            if (x['data']['label'] == type):
-                if (x['data']['source'] == id):
-                    for y in nodes:
-                        if (y['data']['id'] == x['data']['target']):
-                            rel.append(y)
-
-        return rel
-
-    def date_helper(self, frame, id):
-        nodes, rels = self.get_all_data(merge = False)
-
-        for x in rels:
-            if (x['data']['target'] == id):
-                for y in nodes:
-                    if (y['data']['id'] == x['data']['source']):
-                        if (y['data']['type'] == frame):
-                            return y
-        return 0
-
-    def get_date_commit(self, commit_id):
-        nodes, rels = self.get_all_data(merge = False)
-
-        node = self.datehelper('Day', commit_id)
-        day = node['data']['label']
-        node = self.datehelper('Month', node['data']['id'])
-        month = node['data']['label']
-        node = self.datehelper('Year', node['data']['id'])
-        year = node['data']['label']
-
-        return date(year, month, day)
-
-
-    def dev_last_active(self, dev_id):
-        nodes, rels = self.get_all_data(merge = False)
-
-        commits = self.get_rels_type(dev_id, 'Commit')
-        recent = self.get_date_commit(commits[0]['data']['id'])
-
-        for x in commits:
-            y = self.get_date_commit(x['data']['id'])
-
-            if y > recent:
-                recent = y
-
-        return recent
 
     def _map_node(self, node):
         """Maps Neo4j Node to UI element

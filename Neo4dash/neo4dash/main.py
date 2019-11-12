@@ -22,6 +22,7 @@ from dash.dependencies import Input, Output
 
 from db import Database
 import filter
+import developers
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -39,6 +40,14 @@ db.configure(
 )
 
 data = db.get_all_data(merge=True)
+nodes, relations = db.get_all_data(merge=False)
+n, r = filter.filter_by_year(nodes, relations, 2018)
+data = n + r
+
+dev = developers.Developers(nodes, relations)
+
+dev.print_dev_last(dev.list_dev_ids())
+#dev.dev_get_activity('37')
 
 styles = {
     'json-output': {
@@ -58,12 +67,12 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',					
+					'width': '30vh',
 		            'display' : 'inline-block'
-		        },   
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
-		            for name in ['grid', 'random', 'circle', 'cose', 'concentric']
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-day',
@@ -73,7 +82,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block',
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
@@ -87,7 +96,7 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
@@ -100,13 +109,13 @@ app.layout = html.Div([
 		            'height': '6vh',
 					'width': '30vh',
 		            'display' : 'inline-block'
-		        },            
+		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
-			html.Div( dcc.Markdown('''# **Github Visualization**'''), 
-				style={'display' : 'inline-block', 
+			html.Div( dcc.Markdown('''# **Github Visualization**'''),
+				style={'display' : 'inline-block',
 						'color': '#4544ae',
 						'padding-left': '100px',
 						}),
@@ -151,9 +160,19 @@ app.layout = html.Div([
             dcc.Tab(label='List of active developers', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('Developer name and last activity:'),
+                    html.Pre(
+                        id='all-developers',
+
+                    ),
                 ])
             ]),
 
+            dcc.Tab(label='List of files', children=[
+                html.Div(style=styles['tab'], children=[
+                    html.P('File names and number of commits: '),
+
+                ])
+            ]),
 
             dcc.Tab(label='Tap Data', children=[
                 html.Div(style=styles['tab'], children=[
@@ -213,12 +232,46 @@ def update_layout(layout):
         'animate': True
     }
 
+@app.callback(Output('cytoscape', 'elements'),
+              [Input('dropdown-slider-day', 'value'),
+                Input('dropdown-slider-month', 'value'),
+                Input('dropdown-slider-year', 'value')],)
+def update_layout2(days, months, years):
+
+    nodes, relations = db.get_all_data(merge=False)
+
+    try:
+        y = int(years)
+        nodes, relations = filter.filter_by_year(nodes, relations, y)
+    except ValueError:
+        pass
+
+    try:
+        m = int(months)
+        nodes, relations = filter.filter_by_month(nodes, relations, m)
+    except ValueError:
+        pass
+
+    try:
+        d = int(days)
+        nodes, relations = filter.filter_by_day(nodes, relations, d)
+    except ValueError:
+        pass
+
+    data = nodes + relations
+
+    return data
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
 def displayTapNode(data):
     return json.dumps(data, indent=2)
 
+@app.callback(Output('all-developers', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDevs(data):
+	dev = developers.Developers(nodes, relations)
+	return dev.print_dev_last(dev.list_dev_ids())
 
 #TO-DO: Show developer name
 '''
