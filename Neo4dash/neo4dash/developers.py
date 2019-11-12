@@ -1,6 +1,7 @@
 from datetime import date
+from singleton import Singleton
 
-class Developers():
+class Developers(metaclass=Singleton):
     def __init__(self, nodes, rels):
         self.nodes = nodes
         self.rels = rels
@@ -17,6 +18,7 @@ class Developers():
     def get_dev_name(self, dev_id):
         dev_nodes = [x for x in self.nodes if x['data']['type'] == 'Developer']
 
+        dev_name = ""
         for x in dev_nodes:
             if x['data']['id'] == dev_id:
                 dev_name = x['data']['label']
@@ -71,6 +73,7 @@ class Developers():
         entry = ""
         result = [ ]
         counter = 0
+        dev_name = ""
 
         for dev in dev_id_list:
             ++counter
@@ -79,13 +82,7 @@ class Developers():
             entry += str(self.dev_last_active(dev))
             entry += "\n"
             result.append(entry)
-            #print(entry)
+            print(entry)
             entry = ""
 
         return result
-
-    def dev_get_activity(self, dev_id):
-
-        commits = self.get_rels_type(dev_id, 'Commit')
-        #print(commits)
-        temp = sorted(commits, key = lambda x: x['data'][''])
