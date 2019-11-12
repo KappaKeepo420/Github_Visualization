@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'jawel'
 
 app = dash.Dash(__name__)
 
@@ -58,6 +58,106 @@ styles = {
     'tab': {'height': 'calc(98vh - 115px)'}
 }
 
+colors = ['red', 'blue', 'green', 'yellow', 'pink']
+
+default_stylesheet = [
+    {
+        "selector": '[type = "Year"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#000080',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Month"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#6495ED',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Day"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#ADD8E6',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Developer"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'triangle',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "File"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'square',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Filetype"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'square',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Branch"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'octagon',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Commit"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'circle',
+            'background-color': '#4544ae',
+            'content': 'data(type)'
+        }
+    },
+    {
+        "selector": 'edge',
+        'style': {
+            "curve-style": "bezier",
+            "opacity": 1,
+            'width': 3,
+            'line-color' : '#fe9803'
+        }
+    },
+
+]
+
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
 		html.Div(className='nine columns', children=[
@@ -72,7 +172,7 @@ app.layout = html.Div([
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
-		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst', 'preset']
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-day',
@@ -127,13 +227,18 @@ app.layout = html.Div([
             style={
                 'height': '80vh',
                 'width': '100%',
+                'display': 'inline-block',
             },
-        )
+          stylesheet=default_stylesheet
+        ),
+        
     ]),
 
     html.Div(className='four columns', children=[
+
         dcc.Tabs(id='tabs', children=[
             dcc.Tab(label='Tap Objects', children=[
+            
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Object JSON:'),
                     html.Pre(
