@@ -47,6 +47,7 @@ data = n + r
 dev = developers.Developers(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
+dev.show_developers_activity(dev.list_dev_ids())
 
 styles = {
     'json-output': {

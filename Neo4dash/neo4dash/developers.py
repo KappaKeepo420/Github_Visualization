@@ -56,6 +56,9 @@ class Developers(metaclass=Singleton):
 
         return date(year, month, day)
 
+    def get_branch_commit(self, commit_id):
+        print("omegalul")
+
     def dev_last_active(self, dev_id):
         commits = self.get_rels_type(dev_id, 'Commit')
         recent = 0
@@ -68,6 +71,53 @@ class Developers(metaclass=Singleton):
                 recent = y
 
         return recent
+
+    def show_developers_activity(self, dev_id_list):
+        for dev in dev_id_list:
+            print("Developer: " + str(self.get_dev_name(dev)) + '\n')
+            print("Total commits: " + str(self._show_dev_activity(dev)) + '\n')
+
+    def _show_dev_activity(self, dev_id):
+        commits = self._get_commits(dev_id)
+        counter = 0
+
+        if (commits == 0):
+            return 0
+
+        for n in commits:
+            print("Commit:" + str(n['data']['label']))
+            counter += 1
+            for x in self.rels:
+                if (x['data']['source'] == n['data']['id']):
+                    for y in self.nodes:
+                        if (y['data']['id'] == x['data']['target']):
+                            if (y['data']['type'] == 'Branch'):
+                                print("In branch: " + str(y['data']['label']))
+                            if (y['data']['type'] == 'File'):
+                                print("File: " + str(y['data']['label']))
+            print("On: " + str(self.get_date_commit(n['data']['id'])) + '\n')
+
+        return counter
+
+    def _get_commits(self, dev_id):
+        commits = []
+
+        for x in self.rels:
+            if (x['data']['source'] == dev_id):
+                for y in self.nodes:
+                    if (y['data']['id'] == x['data']['target']):
+                        commits.append(y)
+
+        commits.reverse()
+
+        return commits
+
+    def get_filetype(self, file_id):
+        for x in self.rels:
+            if (x['data']['target'] == file_id):
+                for y in self.nodes:
+                    if (y['data']['id'] == x['data']['source']):
+                        return y['data']['label']
 
     def print_dev_last(self, dev_id_list):
         entry = ""
