@@ -57,9 +57,7 @@ styles = {
     },
     'tab': {'height': 'calc(98vh - 115px)'}
 }
-
-colors = ['red', 'blue', 'green', 'yellow', 'pink']
-
+#UI NODE AND EDGE STYLES
 default_stylesheet = [
     {
         "selector": '[type = "Year"]',
@@ -98,7 +96,7 @@ default_stylesheet = [
             'height': 25,
             'width': 25,
             'shape' : 'triangle',
-            'background-color': '#4544ae',
+            'background-color': '#00CCCC',
             'content': 'data(label)'
         }
     },
@@ -109,7 +107,7 @@ default_stylesheet = [
             'height': 25,
             'width': 25,
             'shape' : 'square',
-            'background-color': '#4544ae',
+            'background-color': '#330099',
             'content': 'data(label)'
         }
     },
@@ -157,7 +155,7 @@ default_stylesheet = [
     },
 
 ]
-
+#UI DROPDOWN MENUS AND CYTOSCAPE
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
 		html.Div(className='nine columns', children=[
@@ -167,7 +165,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -180,7 +178,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block',
 		        },
 		        options=[
@@ -194,7 +192,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -207,17 +205,30 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-lasts',
+		        value='Select last activity for:',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '25vh',
+		            'display' : 'inline-block'
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select last activity for:', 'Last day', 'Last week', 'Last month']
+		        ]),
 			html.Div( dcc.Markdown('''# **Github Visualization**'''),
 				style={'display' : 'inline-block',
 						'color': '#4544ae',
-						'padding-left': '100px',
+						'padding-left': '80px',
 						}),
 		]),
         cyto.Cytoscape(
@@ -225,7 +236,7 @@ app.layout = html.Div([
             layout={'name': 'grid'},
             elements=data,
             style={
-                'height': '80vh',
+                'height': '70vh',
                 'width': '100%',
                 'display': 'inline-block',
             },
@@ -233,7 +244,7 @@ app.layout = html.Div([
         ),
         
     ]),
-
+    #UI TABS
     html.Div(className='four columns', children=[
 
         dcc.Tabs(id='tabs', children=[
