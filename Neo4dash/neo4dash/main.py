@@ -248,21 +248,7 @@ app.layout = html.Div([
     html.Div(className='four columns', children=[
 
         dcc.Tabs(id='tabs', children=[
-            dcc.Tab(label='Tap Objects', children=[
-            
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Object JSON:'),
-                    html.Pre(
-                        id='tap-node-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Object JSON:'),
-                    html.Pre(
-                        id='tap-edge-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ]),
+
 
             dcc.Tab(label='Developer Information', children=[
                 html.Div(style=styles['tab'], children=[
@@ -286,7 +272,27 @@ app.layout = html.Div([
             dcc.Tab(label='List of files', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('File names and number of commits: '),
+                    html.Pre(
+                        id='all-files',
 
+                    ),
+                ])
+            ]),
+            #DEVELOPER
+            
+            dcc.Tab(label='Tap Objects', children=[
+            
+                html.Div(style=styles['tab'], children=[
+                    html.P('Node Object JSON:'),
+                    html.Pre(
+                        id='tap-node-json-output',
+                        style=styles['json-output']
+                    ),
+                    html.P('Edge Object JSON:'),
+                    html.Pre(
+                        id='tap-edge-json-output',
+                        style=styles['json-output']
+                    )
                 ])
             ]),
 
@@ -348,6 +354,23 @@ def update_layout(layout):
         'animate': True
     }
 
+@app.callback(Output('all-files', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayFiles(data):
+    nodes, relations = db.get_all_data(merge=False)
+    result = filter.commits_per_file(nodes, relations)
+    result2 = []
+    entry = ""
+    for element in result:
+        entry += element
+        entry += " : "
+        entry += str(result[element])
+        entry += "\n"
+        result2.append(entry)
+        entry = ""
+
+    return result2
+
 @app.callback(Output('cytoscape', 'elements'),
               [Input('dropdown-slider-day', 'value'),
                 Input('dropdown-slider-month', 'value'),
@@ -392,15 +415,11 @@ def displayDevs(data):
 #TO-DO: Show developer name
 '''
 @app.callback(Output('developer-output', 'children'),
-              [Input('cytoscape', 'tapNode')])
+              [Input('cytoscape', 'tapNodeData')])
 def displayDeveloper(data):
-	if data['data']['type'] == 'Developer':
-		#return data['data']['Id']
-		return 'jawel'
-	else:
-		pass
+    if data["type"] == "Developer":
+        return json.dumps(data["name"], indent=2)
 '''
-
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
 def displayTapEdge(data):
