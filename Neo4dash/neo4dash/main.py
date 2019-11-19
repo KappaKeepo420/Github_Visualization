@@ -47,7 +47,7 @@ data = n + r
 dev = developers.Developers(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
-#dev.dev_get_activity('37')
+dev.show_developers_activity(dev.list_dev_ids())
 
 styles = {
     'json-output': {
@@ -57,7 +57,105 @@ styles = {
     },
     'tab': {'height': 'calc(98vh - 115px)'}
 }
+#UI NODE AND EDGE STYLES
+default_stylesheet = [
+    {
+        "selector": '[type = "Year"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#000080',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Month"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#6495ED',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Day"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'background-color': '#ADD8E6',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Developer"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'triangle',
+            'background-color': '#00CCCC',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "File"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'square',
+            'background-color': '#330099',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Filetype"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'square',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Branch"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'octagon',
+            'background-color': '#4544ae',
+            'content': 'data(label)'
+        }
+    },
+    {
+        "selector": '[type = "Commit"]',
+        'style': {
+            "opacity": 0.9,
+            'height': 25,
+            'width': 25,
+            'shape' : 'circle',
+            'background-color': '#4544ae',
+            'content': 'data(type)'
+        }
+    },
+    {
+        "selector": 'edge',
+        'style': {
+            "curve-style": "bezier",
+            "opacity": 1,
+            'width': 3,
+            'line-color' : '#fe9803'
+        }
+    },
 
+]
+#UI DROPDOWN MENUS AND CYTOSCAPE
 app.layout = html.Div([
     html.Div(className='eight columns', children=[
 		html.Div(className='nine columns', children=[
@@ -67,12 +165,12 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
-		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst', 'preset']
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-day',
@@ -80,7 +178,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block',
 		        },
 		        options=[
@@ -94,7 +192,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -107,17 +205,30 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '30vh',
+					'width': '25vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-lasts',
+		        value='Select last activity for:',
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '25vh',
+		            'display' : 'inline-block'
+		        },
+		        options=[
+		            {'label': name.capitalize(), 'value': name}
+		            for name in ['Select last activity for:', 'Last day', 'Last week', 'Last month']
+		        ]),
 			html.Div( dcc.Markdown('''# **Github Visualization**'''),
 				style={'display' : 'inline-block',
 						'color': '#4544ae',
-						'padding-left': '100px',
+						'padding-left': '80px',
 						}),
 		]),
         cyto.Cytoscape(
@@ -125,15 +236,20 @@ app.layout = html.Div([
             layout={'name': 'grid'},
             elements=data,
             style={
-                'height': '80vh',
+                'height': '70vh',
                 'width': '100%',
+                'display': 'inline-block',
             },
-        )
+          stylesheet=default_stylesheet
+        ),
+        
     ]),
-
+    #UI TABS
     html.Div(className='four columns', children=[
+
         dcc.Tabs(id='tabs', children=[
             dcc.Tab(label='Tap Objects', children=[
+            
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Object JSON:'),
                     html.Pre(
