@@ -45,7 +45,7 @@ def filter_by_year(nodes, relations, year):
 
 def filter_by_developer(nodes, relations, developer):
     developer_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
-    developers = [x for x in date_nodes if x['data']['name'] == developer]
+    developers = [x for x in developer_nodes if x['data']['name'] == developer]
     return _filter_by(nodes, relations, developers) 
 
 # TODO: might not be the best place to put this function
@@ -72,4 +72,3 @@ def commits_per_file(nodes, relations):
                     results[f['data']['name']] += 1
 
     return results
-
