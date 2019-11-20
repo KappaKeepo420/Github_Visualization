@@ -27,7 +27,7 @@ import developers
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'jawel'
 
 app = dash.Dash(__name__)
 
@@ -48,6 +48,10 @@ dev = developers.Developers(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
 dev.show_developers_activity(dev.list_dev_ids())
+
+devs = ['Select developer']
+devs += dev.list_dev_name()
+
 
 styles = {
     'json-output': {
@@ -165,7 +169,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '20vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -178,7 +182,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '20vh',
 		            'display' : 'inline-block',
 		        },
 		        options=[
@@ -192,7 +196,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '20vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -205,7 +209,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '20vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -214,17 +218,29 @@ app.layout = html.Div([
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-lasts',
-		        value='Select last activity for:',
+		        value='Show last activity:',
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '20vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select last activity for:', 'Last day', 'Last week', 'Last month']
 		        ]),
+		    dcc.Dropdown(
+		        id='dropdown-slider-devs',
+                value=devs[0],
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '20vh',
+		            'display' : 'inline-block',
+		        },
+		        options=[{'label' : i, 'value' : i} for i in devs],
+                               
+            ),
 			html.Div( dcc.Markdown('''# **Github Visualization**'''),
 				style={'display' : 'inline-block',
 						'color': '#4544ae',
@@ -248,16 +264,6 @@ app.layout = html.Div([
     html.Div(className='four columns', children=[
 
         dcc.Tabs(id='tabs', children=[
-
-
-            dcc.Tab(label='Developer Information', children=[
-                html.Div(style=styles['tab'], children=[
-                    html.P('Developer name:'),
-                    html.Pre(
-                        id='developer-output'
-                    ),
-                ])
-            ]),
 
             dcc.Tab(label='List of active developers', children=[
                 html.Div(style=styles['tab'], children=[
@@ -374,8 +380,9 @@ def displayFiles(data):
 @app.callback(Output('cytoscape', 'elements'),
               [Input('dropdown-slider-day', 'value'),
                 Input('dropdown-slider-month', 'value'),
-                Input('dropdown-slider-year', 'value')],)
-def update_layout2(days, months, years):
+                Input('dropdown-slider-year', 'value'),
+                Input('dropdown-slider-devs', 'value')],)
+def update_layout2(days, months, years, developers):
 
     nodes, relations = db.get_all_data(merge=False)
 
@@ -396,6 +403,9 @@ def update_layout2(days, months, years):
         nodes, relations = filter.filter_by_day(nodes, relations, d)
     except ValueError:
         pass
+    
+    if developers != 'Select developer':
+        nodes, relations = filter.filter_by_developer(nodes, relations, developers)
 
     data = nodes + relations
 
@@ -412,14 +422,6 @@ def displayDevs(data):
 	dev = developers.Developers(nodes, relations)
 	return dev.print_dev_last(dev.list_dev_ids())
 
-#TO-DO: Show developer name
-'''
-@app.callback(Output('developer-output', 'children'),
-              [Input('cytoscape', 'tapNodeData')])
-def displayDeveloper(data):
-    if data["type"] == "Developer":
-        return json.dumps(data["name"], indent=2)
-'''
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
 def displayTapEdge(data):
