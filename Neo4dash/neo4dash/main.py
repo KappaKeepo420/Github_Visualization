@@ -23,6 +23,7 @@ from dash.dependencies import Input, Output
 from db import Database
 import filter
 import developers
+import files
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -45,12 +46,16 @@ n, r = filter.filter_by_year(nodes, relations, 2018)
 data = n + r
 
 dev = developers.Developers(nodes, relations)
+fil = files.Files(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
 dev.show_developers_activity(dev.list_dev_ids())
 
 devs = ['Select developer']
 devs += dev.list_dev_name()
+
+n_files = ['Select file']
+n_files += fil.list_file_name()
 
 
 styles = {
@@ -241,6 +246,27 @@ app.layout = html.Div([
 		        options=[{'label' : i, 'value' : i} for i in devs],
                                
             ),
+             dcc.Dropdown(
+		        id='dropdown-slider-files',
+                value=n_files[0],
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '20vh',
+		            'display' : 'inline-block',
+		        },
+		        options=[{'label' : i, 'value' : i} for i in n_files],
+                               
+            ),
+			html.Button('Reset',
+						id='reset_button',
+						style={ 
+							'width' : '10vh',
+							'height' : '6vh',
+							'padding-top' : '0px',
+							'display' : 'inline-block',
+						},
+			),
 			html.Div( dcc.Markdown('''# **Github Visualization**'''),
 				style={'display' : 'inline-block',
 						'color': '#4544ae',
@@ -381,9 +407,9 @@ def displayFiles(data):
               [Input('dropdown-slider-day', 'value'),
                 Input('dropdown-slider-month', 'value'),
                 Input('dropdown-slider-year', 'value'),
-                Input('dropdown-slider-devs', 'value')],)
-def update_layout2(days, months, years, developers):
-
+                Input('dropdown-slider-devs', 'value'),
+                Input('dropdown-slider-files','value')],)
+def update_layout2(days, months, years, developers, files):
     nodes, relations = db.get_all_data(merge=False)
 
     try:
@@ -406,10 +432,42 @@ def update_layout2(days, months, years, developers):
     
     if developers != 'Select developer':
         nodes, relations = filter.filter_by_developer(nodes, relations, developers)
-
+    
+    if files != 'Select file':
+        nodes, relations = filter.filter_by_file(nodes, relations, files)
+    
     data = nodes + relations
 
     return data
+
+#RESET BUTTON CALLBACKS
+
+@app.callback(Output('dropdown-slider-year', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select year'
+
+@app.callback(Output('dropdown-slider-month', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select month'
+
+@app.callback(Output('dropdown-slider-day', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select day'
+
+@app.callback(Output('dropdown-slider-devs', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select developer'
+
+@app.callback(Output('dropdown-slider-files', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select file'
+
+#RESET BUTTON CALLBACKS ^
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
