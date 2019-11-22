@@ -1,51 +1,186 @@
-def _find_children(nodes, relations, result_nodes, result_relations, node):
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+from singleton import Singleton
 
-    for x in relations:
-        if x['data']['source'] == node['data']['id']:
-            if x not in result_relations:
-                result_relations.append(x)
+class Filter(metaclass=Singleton):
+  def __init__(self, nodes, rels):
+    self.nodes = nodes
+    self.rels = rels
+    self.file_list = []
+    self.full_list = []
+    self.rel_list = []
 
-    target_ids = [x['data']['target'] for x in result_relations]
+  def date_helper(self, frame, id):
+    for x in self.rels:
+      if (x['data']['target'] == id):
+          for y in self.nodes:
+              if (y['data']['id'] == x['data']['source']):
+                  if (y['data']['type'] == frame):
+                      return y
+    return 0
 
-    target_nodes = []
+  def get_date_commit(self, commit_id):
+    node = self.date_helper('Day', commit_id)
+    day = node['data']['label']
+    node = self.date_helper('Month', node['data']['id'])
+    month = node['data']['label']
+    node = self.date_helper('Year', node['data']['id'])
+    year = node['data']['label']
 
-    for id in target_ids:
-        for no in nodes:
-            if id == no['data']['id']:
-                target_nodes.append(no)
+    return date(year, month, day)
 
-    for target in target_nodes:
-        if target not in result_nodes:
-            result_nodes.append(target)
-            _find_children(nodes, relations, result_nodes, result_relations, target)
+  def valid_commits_date(self, date1, date2):
+    commits = [x['data']['id'] for x in self.nodes if x['data']['type'] == 'Commit']
+    newcommits = []
 
-def _filter_by(nodes, relations, filter_nodes):
-    result_nodes = []
-    result_relations = []
-    for x in filter_nodes:
-        result_nodes.append(x);
-        _find_children(nodes, relations, result_nodes, result_relations, x)
+    for x in commits:
+      date = self.get_date_commit(x)
+      if date >= date1 and date <= date2:
+        newcommits.append(x)
 
-    return result_nodes, result_relations
+    return newcommits
 
-def filter_by_day(nodes, relations, day):
-    date_nodes = [x for x in nodes if x['data']['type'] == 'Day']
-    dates = [x for x in date_nodes if x['data']['name'] == day]
-    return _filter_by(nodes, relations, dates)
+  def filter_file(self, id_file):
+    commit_list = []
+    for x in self.rels:
+      if x['data']['target'] == id_file:
+        if 'Commit' in x['data']['label_concat']:
+          commit_list.append(x['data']['source'])
 
-def filter_by_month(nodes, relations, month):
-    date_nodes = [x for x in nodes if x['data']['type'] == 'Month']
-    dates = [x for x in date_nodes if x['data']['name'] == month]
-    return _filter_by(nodes, relations, dates)
+    return commit_list
 
-def filter_by_year(nodes, relations, year):
-    date_nodes = [x for x in nodes if x['data']['type'] == 'Year']
-    dates = [x for x in date_nodes if x['data']['name'] == year]
-    return _filter_by(nodes, relations, dates)
+  def filter_filetype(self, id_filetype):
+    commit_list = []
+    for x in self.rels:
+      if x['data']['source'] == id_filetype:
+        for y in self.filter_file(x['data']['target']):
+          commit_list.append(y)
+    return commit_list
 
-def filter_by_developer(nodes, relations, developer):
-    developer_nodes = [x for x in nodes if x['data']['type'] == 'Developer']
-    developers = [x for x in date_nodes if x['data']['name'] == developer]
-    return _filter_by(nodes, relations, developers)
+  def filter_developer(self, id_dev):
+    commit_list = []
+    for x in self.rels:
+      if x['data']['source'] == id_dev:
+        commit_list.append(x['data']['target'])
+    return commit_list
 
-    return result_nodes, result_relations
+  def gather_commits(self, commit_list):
+    for x in commit_list:
+      for y in self.nodes: #reverse
+        if y['data']['id'] == x:
+          self.full_list.append(y)
+    for x in commit_list:
+      for y in commit_list:
+        for z in self.rels:
+          if z['data']['source'] == x and z['data']['target'] == y:
+              self.rel_list.append(z)
+
+  def gather_dev(self, commit_list):
+    for x in commit_list:
+      for y in self.rels:
+        if y['data']['target'] == x:
+          # Neo4j sometimes returns the labels in reverse order
+          # see db.py _map_rels
+          if "Developer" in y['data']['label_concat']:
+            for z in self.nodes:
+              if z['data']['id'] == y['data']['source']:
+                self.rel_list.append(y)
+                if z not in self.full_list:
+                  self.full_list.append(z)
+
+  def gather_file_branch(self, commit_list):
+    for x in commit_list:
+      for y in self.rels:
+        if y['data']['source'] == x and "Commit" in y['data']['label_concat']:
+          for z in self.nodes:
+            if z['data']['id'] == y['data']['target'] and z['data']['type'] != 'Commit':
+              self.rel_list.append(y)
+              if z not in self.file_list:
+                self.file_list.append(z)
+                self.full_list.append(z)
+
+  def gather_filetype(self, commit_list):
+    for x in self.file_list:
+      if x['data']['type'] == 'File':
+        for y in self.rels:
+          if y['data']['target'] == x['data']['id']:
+            for z in self.nodes:
+              if z['data']['type'] == 'Filetype':
+                if z['data']['id'] == y['data']['source']:
+                  self.rel_list.append(y)
+                  if z not in self.full_list:
+                    self.full_list.append(z)
+
+  def gather_date(self, commit_list):
+    day_list = []
+    month_list = []
+
+    for x in commit_list:
+      for y in self.rels:
+        if y['data']['target'] == x and 'Commit' in y['data']['label_concat']:
+          for z in self.nodes:
+            if z['data']['id'] == y['data']['source']:
+              if z['data']['type'] == 'Day':
+                self.rel_list.append(y)
+                if z not in self.full_list:
+                  self.full_list.append(z)
+                  day_list.append(z['data']['id'])
+
+    for x in day_list:
+      for y in self.rels:
+        if y['data']['target'] == x and 'Day' in y['data']['label_concat']:
+          for z in self.nodes:
+              if z['data']['id'] == y['data']['source']:
+                self.rel_list.append(y)
+                if z not in self.full_list:
+                  self.full_list.append(z)
+                  month_list.append(z['data']['id'])
+
+    for x in month_list:
+      for y in self.rels:
+        if y['data']['target'] == x and 'Year' in y['data']['label_concat']:
+          for z in self.nodes:
+              if z['data']['id'] == y['data']['source']:
+                self.rel_list.append(y)
+                if z not in self.full_list:
+                  self.full_list.append(z)
+
+  def node_gathering(self, commit_list):
+
+    self.gather_commits(commit_list)
+    self.gather_dev(commit_list)
+    self.gather_file_branch(commit_list)
+    self.gather_filetype(commit_list)
+    self.gather_date(commit_list)
+
+  def filter_handler(self, dev_id, file_id, filetype_id, date1, date2):
+    dev_list = []
+    file_list = []
+    filetype_list = []
+    date_list = []
+    ultralist = []
+    result = []
+
+    if dev_id is not None:
+      dev_list = self.filter_developer(dev_id)
+      ultralist.append(dev_list)
+    if file_id is not None:
+      file_list = self.filter_file(file_id)
+      ultralist.append(file_list)
+    if filetype_id is not None:
+      filetype_list = self.filter_filetype(filetype_id)
+      ultralist.append(file_list)
+    if date1 is not None and date2 is not None:
+      date_list = self.valid_commits_date(date1, date2)
+      ultralist.append(date_list)
+
+    if len(ultralist) != 0:
+      result = ultralist[0]
+      for i in range(1, len(ultralist)):
+        result = set(result).intersection(ultralist[i])
+
+    result = list(result)
+
+    self.node_gathering(result)
+
+    return self.full_list, self.rel_list
