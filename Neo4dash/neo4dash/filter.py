@@ -48,6 +48,11 @@ def filter_by_developer(nodes, relations, developer):
     developers = [x for x in developer_nodes if x['data']['name'] == developer]
     return _filter_by(nodes, relations, developers) 
 
+def filter_by_file(nodes, relations, n_file):
+    file_nodes = [x for x in nodes if x['data']['type'] == 'File']
+    n_files = [x for x in file_nodes if x['data']['label'] == n_file]
+    return _filter_by(nodes, relations, n_files) 
+
 # TODO: might not be the best place to put this function
 # returns a dictionary with filename as key and amount of commits as value
 def commits_per_file(nodes, relations):
