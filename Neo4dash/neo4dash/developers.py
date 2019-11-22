@@ -15,6 +15,15 @@ class Developers(metaclass=Singleton):
 
         return arr
 
+    def list_dev_name(self):
+        dev_nodes = [x for x in self.nodes if x['data']['type'] == 'Developer']
+        named = []
+
+        for x in dev_nodes:
+            named.append(x['data']['label'])
+
+        return named
+
     def get_dev_name(self, dev_id):
         dev_nodes = [x for x in self.nodes if x['data']['type'] == 'Developer']
 

@@ -14,3 +14,8 @@ class Files(metaclass=Singleton):
             named.append(x['data']['label'])
 
         return named
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> master
