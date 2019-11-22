@@ -178,9 +178,34 @@ class Filter(metaclass=Singleton):
       result = ultralist[0]
       for i in range(1, len(ultralist)):
         result = set(result).intersection(ultralist[i])
+    else:
+      return self.nodes, self.rels
 
     result = list(result)
 
     self.node_gathering(result)
 
     return self.full_list, self.rel_list
+
+def commits_per_file(nodes, relations):
+    results = dict(); # name, amount
+
+    files = [x for x in nodes if x['data']['type'] == 'File'];
+    commits = [x for x in nodes if x['data']['type'] == 'Commit'];
+
+    for f in files:
+        results[f['data']['name']] = 0
+
+    for f in files:
+        to_file_relations = []
+        for r in relations:
+            if r['data']['target'] == f['data']['id']:
+                to_file_relations.append(r)
+
+        r = [];
+        for x in to_file_relations:
+            for y in commits:
+                if x['data']['source'] == y['data']['id']:
+                    results[f['data']['name']] += 1
+
+    return results

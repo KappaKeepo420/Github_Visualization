@@ -420,33 +420,28 @@ def displayFiles(data):
 def update_layout2(days, months, years, developers, files):
     nodes, relations = db.get_all_data(merge=False)
 
-    try:
-        y = int(years)
-        nodes, relations = filter.filter_by_year(nodes, relations, y)
-    except ValueError:
-        pass
+    # try:
+    #     y = int(years)
+    #     nodes, relations = filter.filter_by_year(nodes, relations, y)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     m = int(months)
+    #     nodes, relations = filter.filter_by_month(nodes, relations, m)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     d = int(days)
+    #     nodes, relations = filter.filter_by_day(nodes, relations, d)
+    # except ValueError:
+    #     pass
 
-    try:
-        m = int(months)
-        nodes, relations = filter.filter_by_month(nodes, relations, m)
-    except ValueError:
-        pass
+    #data = nodes + relations
+    ft = filter.Filter(nodes, relations)
 
-    try:
-        d = int(days)
-        nodes, relations = filter.filter_by_day(nodes, relations, d)
-    except ValueError:
-        pass
-
-    if developers != 'Select developer':
-        nodes, relations = filter.filter_by_developer(nodes, relations, developers)
-
-    if files != 'Select file':
-        nodes, relations = filter.filter_by_file(nodes, relations, files)
-
-    data = nodes + relations
-
-    return data
+    return ft.filter_handler(55, None, None, None, None)
 
 #RESET BUTTON CALLBACKS
 
