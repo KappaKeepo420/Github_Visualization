@@ -41,8 +41,6 @@ db.configure(
 
 data = db.get_all_data(merge=True)
 nodes, relations = db.get_all_data(merge=False)
-n, r = filter.filter_by_year(nodes, relations, 2018)
-data = n + r
 
 dev = developers.Developers(nodes, relations)
 
@@ -234,23 +232,23 @@ def update_layout2(days, months, years):
 
     nodes, relations = db.get_all_data(merge=False)
 
-    try:
-        y = int(years)
-        nodes, relations = filter.filter_by_year(nodes, relations, y)
-    except ValueError:
-        pass
-
-    try:
-        m = int(months)
-        nodes, relations = filter.filter_by_month(nodes, relations, m)
-    except ValueError:
-        pass
-
-    try:
-        d = int(days)
-        nodes, relations = filter.filter_by_day(nodes, relations, d)
-    except ValueError:
-        pass
+    # try:
+    #     y = int(years)
+    #     nodes, relations = filter.filter_by_year(nodes, relations, y)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     m = int(months)
+    #     nodes, relations = filter.filter_by_month(nodes, relations, m)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     d = int(days)
+    #     nodes, relations = filter.filter_by_day(nodes, relations, d)
+    # except ValueError:
+    #     pass
 
     data = nodes + relations
 
