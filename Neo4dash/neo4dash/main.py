@@ -23,6 +23,7 @@ from dash.dependencies import Input, Output
 from db import Database
 import filter
 import developers
+import files
 
 DB_URL = 'localhost'
 PORT = 13000
@@ -41,13 +42,19 @@ db.configure(
 
 data = db.get_all_data(merge=True)
 nodes, relations = db.get_all_data(merge=False)
-n, r = filter.filter_by_year(nodes, relations, 2018)
-data = n + r
 
 dev = developers.Developers(nodes, relations)
+fil = files.Files(nodes, relations)
 
 dev.print_dev_last(dev.list_dev_ids())
 dev.show_developers_activity(dev.list_dev_ids())
+
+devs = ['Select developer']
+devs += dev.list_dev_name()
+
+n_files = ['Select file']
+n_files += fil.list_file_name()
+
 
 styles = {
     'json-output': {
@@ -165,12 +172,12 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '18vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
-		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst', 'preset']
+		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 		        ]),
 		    dcc.Dropdown(
 		        id='dropdown-slider-day',
@@ -178,7 +185,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '18vh',
 		            'display' : 'inline-block',
 		        },
 		        options=[
@@ -192,7 +199,7 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '18vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
@@ -205,30 +212,74 @@ app.layout = html.Div([
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
+					'width': '18vh',
 		            'display' : 'inline-block'
 		        },
 		        options=[
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['Select year', '2017', '2018', '2019']
 		        ]),
+        #DATE INPUT AREA
+            dcc.Input(
+                id='input-start-date',
+                placeholder='Enter a start-date (dd-mm-yy)',
+                type='text',
+		        style={
+		            'height': '6vh',
+					'width': '18vh',
+		            'display' : 'inline-block'
+		        },
+                value=''
+            ),
+
+            dcc.Input(
+                id='input-end-date',
+                placeholder='Enter an end-date (dd-mm-yy)',
+                type='text',
+		        style={
+		            'height': '6vh',
+					'width': '18vh',
+		            'display' : 'inline-block'
+		        },
+                value=''
+            ),
 		    dcc.Dropdown(
-		        id='dropdown-slider-lasts',
-		        value='Select last activity for:',
+		        id='dropdown-slider-devs',
+                value=devs[0],
 		        clearable=False,
 		        style={
 		            'height': '6vh',
-					'width': '25vh',
-		            'display' : 'inline-block'
+					'width': '18vh',
+		            'display' : 'inline-block',
 		        },
-		        options=[
-		            {'label': name.capitalize(), 'value': name}
-		            for name in ['Select last activity for:', 'Last day', 'Last week', 'Last month']
-		        ]),
+		        options=[{'label' : i, 'value' : i} for i in devs],
+
+            ),
+             dcc.Dropdown(
+		        id='dropdown-slider-files',
+                value=n_files[0],
+		        clearable=False,
+		        style={
+		            'height': '6vh',
+					'width': '18vh',
+		            'display' : 'inline-block',
+		        },
+		        options=[{'label' : i, 'value' : i} for i in n_files],
+
+            ),
+			html.Button('Reset',
+						id='reset_button',
+						style={
+							'width' : '10vh',
+							'height' : '6vh',
+							'padding-top' : '0px',
+							'display' : 'inline-block',
+						},
+			),
 			html.Div( dcc.Markdown('''# **Github Visualization**'''),
 				style={'display' : 'inline-block',
 						'color': '#4544ae',
-						'padding-left': '80px',
+						'padding-left': '60px',
 						}),
 		]),
         cyto.Cytoscape(
@@ -242,36 +293,12 @@ app.layout = html.Div([
             },
           stylesheet=default_stylesheet
         ),
-        
+
     ]),
     #UI TABS
     html.Div(className='four columns', children=[
 
         dcc.Tabs(id='tabs', children=[
-            dcc.Tab(label='Tap Objects', children=[
-            
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Object JSON:'),
-                    html.Pre(
-                        id='tap-node-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Object JSON:'),
-                    html.Pre(
-                        id='tap-edge-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ]),
-
-            dcc.Tab(label='Developer Information', children=[
-                html.Div(style=styles['tab'], children=[
-                    html.P('Developer name:'),
-                    html.Pre(
-                        id='developer-output'
-                    ),
-                ])
-            ]),
 
             dcc.Tab(label='List of active developers', children=[
                 html.Div(style=styles['tab'], children=[
@@ -286,7 +313,27 @@ app.layout = html.Div([
             dcc.Tab(label='List of files', children=[
                 html.Div(style=styles['tab'], children=[
                     html.P('File names and number of commits: '),
+                    html.Pre(
+                        id='all-files',
 
+                    ),
+                ])
+            ]),
+            #DEVELOPER
+
+            dcc.Tab(label='Tap Objects', children=[
+
+                html.Div(style=styles['tab'], children=[
+                    html.P('Node Object JSON:'),
+                    html.Pre(
+                        id='tap-node-json-output',
+                        style=styles['json-output']
+                    ),
+                    html.P('Edge Object JSON:'),
+                    html.Pre(
+                        id='tap-edge-json-output',
+                        style=styles['json-output']
+                    )
                 ])
             ]),
 
@@ -337,7 +384,6 @@ app.layout = html.Div([
     ])
 ])
 
-
 # Update layout
 
 @app.callback(Output('cytoscape', 'layout'),
@@ -348,35 +394,83 @@ def update_layout(layout):
         'animate': True
     }
 
+@app.callback(Output('all-files', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayFiles(data):
+    nodes, relations = db.get_all_data(merge=False)
+    result = filter.commits_per_file(nodes, relations)
+    result2 = []
+    entry = ""
+    for element in result:
+        entry += element
+        entry += " : "
+        entry += str(result[element])
+        entry += "\n"
+        result2.append(entry)
+        entry = ""
+
+    return result2
+
 @app.callback(Output('cytoscape', 'elements'),
               [Input('dropdown-slider-day', 'value'),
                 Input('dropdown-slider-month', 'value'),
-                Input('dropdown-slider-year', 'value')],)
-def update_layout2(days, months, years):
-
+                Input('dropdown-slider-year', 'value'),
+                Input('dropdown-slider-devs', 'value'),
+                Input('dropdown-slider-files','value')],)
+def update_layout2(days, months, years, developers, files):
     nodes, relations = db.get_all_data(merge=False)
 
-    try:
-        y = int(years)
-        nodes, relations = filter.filter_by_year(nodes, relations, y)
-    except ValueError:
-        pass
+    # try:
+    #     y = int(years)
+    #     nodes, relations = filter.filter_by_year(nodes, relations, y)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     m = int(months)
+    #     nodes, relations = filter.filter_by_month(nodes, relations, m)
+    # except ValueError:
+    #     pass
+    #
+    # try:
+    #     d = int(days)
+    #     nodes, relations = filter.filter_by_day(nodes, relations, d)
+    # except ValueError:
+    #     pass
 
-    try:
-        m = int(months)
-        nodes, relations = filter.filter_by_month(nodes, relations, m)
-    except ValueError:
-        pass
+    #data = nodes + relations
+    ft = filter.Filter(nodes, relations)
 
-    try:
-        d = int(days)
-        nodes, relations = filter.filter_by_day(nodes, relations, d)
-    except ValueError:
-        pass
+    return ft.filter_handler(55, None, None, None, None)
 
-    data = nodes + relations
+#RESET BUTTON CALLBACKS
 
-    return data
+@app.callback(Output('dropdown-slider-year', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select year'
+
+@app.callback(Output('dropdown-slider-month', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select month'
+
+@app.callback(Output('dropdown-slider-day', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select day'
+
+@app.callback(Output('dropdown-slider-devs', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select developer'
+
+@app.callback(Output('dropdown-slider-files', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select file'
+
+#RESET BUTTON CALLBACKS ^
 
 @app.callback(Output('tap-node-json-output', 'children'),
               [Input('cytoscape', 'tapNode')])
@@ -388,18 +482,6 @@ def displayTapNode(data):
 def displayDevs(data):
 	dev = developers.Developers(nodes, relations)
 	return dev.print_dev_last(dev.list_dev_ids())
-
-#TO-DO: Show developer name
-'''
-@app.callback(Output('developer-output', 'children'),
-              [Input('cytoscape', 'tapNode')])
-def displayDeveloper(data):
-	if data['data']['type'] == 'Developer':
-		#return data['data']['Id']
-		return 'jawel'
-	else:
-		pass
-'''
 
 @app.callback(Output('tap-edge-json-output', 'children'),
               [Input('cytoscape', 'tapEdge')])
