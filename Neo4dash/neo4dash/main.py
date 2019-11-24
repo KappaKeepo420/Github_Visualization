@@ -388,6 +388,13 @@ app.layout = html.Div([
 
 # Update layout
 
+@app.callback(Output('cytoscape', 'elements'),
+                [Input('input-start-date', 'value'),
+                    Input('input-end-date', 'value')],)
+def updateRangedate(start_date, end_date):
+    #Hier volgt functie
+
+
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
@@ -412,7 +419,7 @@ def displayFiles(data):
         entry = ""
 
     return result2
-
+'''
 @app.callback(Output('cytoscape', 'elements'),
               [Input('dropdown-slider-day', 'value'),
                 Input('dropdown-slider-month', 'value'),
@@ -449,7 +456,7 @@ def update_layout2(days, months, years, developers, files):
     data = nodes + relations
 
     return data
-
+'''
 #RESET BUTTON CALLBACKS
 
 @app.callback(Output('dropdown-slider-year', 'value'),
