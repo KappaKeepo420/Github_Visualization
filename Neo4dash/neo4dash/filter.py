@@ -209,3 +209,9 @@ def commits_per_file(nodes, relations):
                     results[f['data']['name']] += 1
 
     return results
+
+def developer_to_id(nodes, developer):
+  for x in nodes:
+    if x['data']['type'] == 'Developer' and x['data']['name'] == developer:
+      return x['data']['id']
+  return None
