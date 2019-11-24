@@ -25,6 +25,8 @@ import filter
 import developers
 import files
 
+import datetime
+
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
@@ -412,36 +414,43 @@ def displayFiles(data):
     return result2
 
 @app.callback(Output('cytoscape', 'elements'),
-              [Input('dropdown-slider-day', 'value'),
-                Input('dropdown-slider-month', 'value'),
-                Input('dropdown-slider-year', 'value'),
+              [Input('input-start-date', 'value'),
+                Input('input-end-date', 'value'),
                 Input('dropdown-slider-devs', 'value'),
                 Input('dropdown-slider-files','value')],)
-def update_layout2(days, months, years, developers, files):
-    nodes, relations = db.get_all_data(merge=False)
+def update_layout2(start_date, end_date, developer, file):
+    xnodes, xrelations = db.get_all_data(merge=False)
+    ft = filter.Filter(xnodes, xrelations)
 
-    # try:
-    #     y = int(years)
-    #     nodes, relations = filter.filter_by_year(nodes, relations, y)
-    # except ValueError:
-    #     pass
-    #
-    # try:
-    #     m = int(months)
-    #     nodes, relations = filter.filter_by_month(nodes, relations, m)
-    # except ValueError:
-    #     pass
-    #
-    # try:
-    #     d = int(days)
-    #     nodes, relations = filter.filter_by_day(nodes, relations, d)
-    # except ValueError:
-    #     pass
+    #TODO: need to convert developer string to id
 
-    #data = nodes + relations
-    ft = filter.Filter(nodes, relations)
+    d = None
+    f = None
+    t = None
+    d1 = None
+    d1 = None
 
-    return ft.filter_handler(55, None, None, None, None)
+    if developer != 'Select developer':
+        d = filter.developer_to_id(xnodes, developer)
+
+    if file != 'Select file':
+        f = file
+
+    try:
+        d1 = datetime.strptime(start_date, '%d-%m-%y')
+    except:
+        d1 = None
+
+    try:
+        d2 = datetime.strptime(start_date, '%d-%m-%y')
+    except:
+        d2 = None
+    
+    t = None
+
+    n, r = ft.filter_handler(d, f, t, d1, d2)
+    
+    return n + r
 
 #RESET BUTTON CALLBACKS
 
