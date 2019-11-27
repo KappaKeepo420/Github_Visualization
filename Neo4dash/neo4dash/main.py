@@ -25,6 +25,8 @@ import filter
 import developers
 import files
 
+import datetime
+
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
@@ -42,8 +44,6 @@ db.configure(
 
 data = db.get_all_data(merge=True)
 nodes, relations = db.get_all_data(merge=False)
-n, r = filter.filter_by_year(nodes, relations, 2018)
-data = n + r
 
 dev = developers.Developers(nodes, relations)
 fil = files.Files(nodes, relations)
@@ -244,7 +244,7 @@ app.layout = html.Div([
 		            'display' : 'inline-block'
 		        },
                 value=''
-            ),  
+            ),
 		    dcc.Dropdown(
 		        id='dropdown-slider-devs',
                 value=devs[0],
@@ -255,7 +255,7 @@ app.layout = html.Div([
 		            'display' : 'inline-block',
 		        },
 		        options=[{'label' : i, 'value' : i} for i in devs],
-                               
+
             ),
              dcc.Dropdown(
 		        id='dropdown-slider-files',
@@ -267,11 +267,11 @@ app.layout = html.Div([
 		            'display' : 'inline-block',
 		        },
 		        options=[{'label' : i, 'value' : i} for i in n_files],
-                               
+
             ),
 			html.Button('Reset',
 						id='reset_button',
-						style={ 
+						style={
 							'width' : '10vh',
 							'height' : '6vh',
 							'padding-top' : '0px',
@@ -295,7 +295,7 @@ app.layout = html.Div([
             },
           stylesheet=default_stylesheet
         ),
-        
+
     ]),
     #UI TABS
     html.Div(className='four columns', children=[
@@ -322,9 +322,9 @@ app.layout = html.Div([
                 ])
             ]),
             #DEVELOPER
-            
+
             dcc.Tab(label='Tap Objects', children=[
-            
+
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Object JSON:'),
                     html.Pre(
@@ -414,41 +414,43 @@ def displayFiles(data):
     return result2
 
 @app.callback(Output('cytoscape', 'elements'),
-              [Input('dropdown-slider-day', 'value'),
-                Input('dropdown-slider-month', 'value'),
-                Input('dropdown-slider-year', 'value'),
+              [Input('input-start-date', 'value'),
+                Input('input-end-date', 'value'),
                 Input('dropdown-slider-devs', 'value'),
                 Input('dropdown-slider-files','value')],)
-def update_layout2(days, months, years, developers, files):
-    nodes, relations = db.get_all_data(merge=False)
+def update_layout2(start_date, end_date, developer, file):
+    xnodes, xrelations = db.get_all_data(merge=False)
+    ft = filter.Filter(xnodes, xrelations)
+
+    #TODO: need to convert developer string to id
+
+    d = None
+    f = None
+    t = None
+    d1 = None
+    d1 = None
+
+    if developer != 'Select developer':
+        d = filter.developer_to_id(xnodes, developer)
+
+    if file != 'Select file':
+        f = file
 
     try:
-        y = int(years)
-        nodes, relations = filter.filter_by_year(nodes, relations, y)
-    except ValueError:
-        pass
+        d1 = datetime.strptime(start_date, '%d-%m-%y')
+    except:
+        d1 = None
 
     try:
-        m = int(months)
-        nodes, relations = filter.filter_by_month(nodes, relations, m)
-    except ValueError:
-        pass
+        d2 = datetime.strptime(start_date, '%d-%m-%y')
+    except:
+        d2 = None
+    
+    t = None
 
-    try:
-        d = int(days)
-        nodes, relations = filter.filter_by_day(nodes, relations, d)
-    except ValueError:
-        pass
+    n, r = ft.filter_handler(d, f, t, d1, d2)
     
-    if developers != 'Select developer':
-        nodes, relations = filter.filter_by_developer(nodes, relations, developers)
-    
-    if files != 'Select file':
-        nodes, relations = filter.filter_by_file(nodes, relations, files)
-    
-    data = nodes + relations
-
-    return data
+    return n + r
 
 #RESET BUTTON CALLBACKS
 
