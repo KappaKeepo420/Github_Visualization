@@ -141,7 +141,6 @@ class Developers(metaclass=Singleton):
             entry += str(self.dev_last_active(dev))
             entry += "\n"
             result.append(entry)
-            print(entry)
             entry = ""
 
         return result
