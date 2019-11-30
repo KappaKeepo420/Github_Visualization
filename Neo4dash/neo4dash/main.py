@@ -25,10 +25,12 @@ import filter
 import developers
 import files
 
+from datetime import datetime, date
+
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'letmein'
+DB_PWD = 'se'
 
 app = dash.Dash(__name__)
 
@@ -42,20 +44,21 @@ db.configure(
 
 data = db.get_all_data(merge=True)
 nodes, relations = db.get_all_data(merge=False)
-n, r = filter.filter_by_year(nodes, relations, 2018)
-data = n + r
 
 dev = developers.Developers(nodes, relations)
 fil = files.Files(nodes, relations)
 
-dev.print_dev_last(dev.list_dev_ids())
-dev.show_developers_activity(dev.list_dev_ids())
+# dev.print_dev_last(dev.list_dev_ids())
+# dev.show_developers_activity(dev.list_dev_ids())
 
 devs = ['Select developer']
 devs += dev.list_dev_name()
 
 n_files = ['Select file']
 n_files += fil.list_file_name()
+
+filetypes = ['Select filetype']
+filetypes += fil.list_filetype_name()
 
 
 styles = {
@@ -224,7 +227,7 @@ app.layout = html.Div([
         #DATE INPUT AREA
             dcc.Input(
                 id='input-start-date',
-                placeholder='Enter a start-date (dd-mm-yy)',
+                placeholder='Start-date (dd-mm-yyyy)',
                 type='text',
 		        style={
 		            'height': '6vh',
@@ -236,7 +239,7 @@ app.layout = html.Div([
 
             dcc.Input(
                 id='input-end-date',
-                placeholder='Enter an end-date (dd-mm-yy)',
+                placeholder='End-date (dd-mm-yyyy)',
                 type='text',
 		        style={
 		            'height': '6vh',
@@ -244,7 +247,7 @@ app.layout = html.Div([
 		            'display' : 'inline-block'
 		        },
                 value=''
-            ),  
+            ),
 		    dcc.Dropdown(
 		        id='dropdown-slider-devs',
                 value=devs[0],
@@ -255,9 +258,9 @@ app.layout = html.Div([
 		            'display' : 'inline-block',
 		        },
 		        options=[{'label' : i, 'value' : i} for i in devs],
-                               
+
             ),
-             dcc.Dropdown(
+            dcc.Dropdown(
 		        id='dropdown-slider-files',
                 value=n_files[0],
 		        clearable=False,
@@ -267,11 +270,24 @@ app.layout = html.Div([
 		            'display' : 'inline-block',
 		        },
 		        options=[{'label' : i, 'value' : i} for i in n_files],
-                               
+
             ),
+            dcc.Dropdown(
+                id='dropdown-slider-filetype',
+                value=filetypes[0],
+                clearable=False,
+                style={
+                    'height': '6vh',
+                    'width': '18vh',
+                    'display' : 'inline-block',
+                },
+                options=[{'label' : i, 'value' : i} for i in filetypes],
+
+            ),
+
 			html.Button('Reset',
 						id='reset_button',
-						style={ 
+						style={
 							'width' : '10vh',
 							'height' : '6vh',
 							'padding-top' : '0px',
@@ -295,7 +311,7 @@ app.layout = html.Div([
             },
           stylesheet=default_stylesheet
         ),
-        
+
     ]),
     #UI TABS
     html.Div(className='four columns', children=[
@@ -322,9 +338,9 @@ app.layout = html.Div([
                 ])
             ]),
             #DEVELOPER
-            
+
             dcc.Tab(label='Tap Objects', children=[
-            
+
                 html.Div(style=styles['tab'], children=[
                     html.P('Node Object JSON:'),
                     html.Pre(
@@ -421,42 +437,53 @@ def displayFiles(data):
     return result2
 '''
 @app.callback(Output('cytoscape', 'elements'),
-              [Input('dropdown-slider-day', 'value'),
-                Input('dropdown-slider-month', 'value'),
-                Input('dropdown-slider-year', 'value'),
+              [Input('input-start-date', 'value'),
+                Input('input-end-date', 'value'),
                 Input('dropdown-slider-devs', 'value'),
-                Input('dropdown-slider-files','value')],)
-def update_layout2(days, months, years, developers, files):
-    nodes, relations = db.get_all_data(merge=False)
+                Input('dropdown-slider-files','value'),
+                Input('dropdown-slider-filetype','value')],)
+def update_layout2(start_date, end_date, developer, file, filetype):
+    xnodes, xrelations = db.get_all_data(merge=False)
+
+    ft = filter.Filter(xnodes, xrelations)
+
+    # #TODO: need to convert developer string to id
+
+    d = None
+    f = None
+    t = None
+
+    if developer != 'Select developer':
+        d = filter.developer_to_id(xnodes, developer)
+
+    if file != 'Select file':
+        f = filter.file_to_id(xnodes, file)
+
+    if filetype != 'Select filetype':
+        t = filter.filetype_to_id(xnodes, filetype)
+        print(t)
 
     try:
-        y = int(years)
-        nodes, relations = filter.filter_by_year(nodes, relations, y)
+        d1 = datetime.strptime(start_date, '%d-%m-%Y')
+        d1 = d1.date()
     except ValueError:
-        pass
-
+        #to do: output that the input is wrong
+        d1 = None
+        # print("Wrong input d1")
     try:
-        m = int(months)
-        nodes, relations = filter.filter_by_month(nodes, relations, m)
+        d2 = datetime.strptime(end_date, '%d-%m-%Y')
+        d2 = d2.date()
     except ValueError:
-        pass
+ master
+        #to do: output that the input is wrong
+        d2 = None
+        # print("Wrong input d2")
 
-    try:
-        d = int(days)
-        nodes, relations = filter.filter_by_day(nodes, relations, d)
-    except ValueError:
-        pass
-    
-    if developers != 'Select developer':
-        nodes, relations = filter.filter_by_developer(nodes, relations, developers)
-    
-    if files != 'Select file':
-        nodes, relations = filter.filter_by_file(nodes, relations, files)
-    
-    data = nodes + relations
+    n, r = ft.filter_handler(d, f, t, d1, d2)
 
-    return data
-'''
+    return n + r
+
+
 #RESET BUTTON CALLBACKS
 
 @app.callback(Output('dropdown-slider-year', 'value'),
@@ -483,6 +510,21 @@ def update_reset(n_clicks):
               [Input('reset_button', 'n_clicks')])
 def update_reset(n_clicks):
         return 'Select file'
+
+@app.callback(Output('dropdown-slider-filetype', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return 'Select filetype'
+
+@app.callback(Output('input-start-date', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return ''
+
+@app.callback(Output('input-end-date', 'value'),
+              [Input('reset_button', 'n_clicks')])
+def update_reset(n_clicks):
+        return ''
 
 #RESET BUTTON CALLBACKS ^
 

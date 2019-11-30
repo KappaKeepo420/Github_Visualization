@@ -15,4 +15,11 @@ class Files(metaclass=Singleton):
 
         return named
 
+    def list_filetype_name(self):
+        filetype_nodes = [x for x in self.nodes if x['data']['type'] == 'Filetype']
+        named = []
 
+        for x in filetype_nodes:
+            named.append(x['data']['label'])
+
+        return named

@@ -144,11 +144,19 @@ class Database(metaclass=Singleton):
         :param rel: Neo4j relationship
         :returns: dictionary with UI details
         """
+        # Neo4j sometimes returns the labels in reverse order
+        # so we concatenate the labels
+        if len(rel.labels) < 2:
+            label2 = ""
+        else:
+            label2 = list(rel.labels)[0] + list(rel.labels)[1]
+
         return {
             'data': {
                 'source': self._get_id(rel.start_node),
                 'target': self._get_id(rel.end_node),
                 'label': list(rel.labels)[0],
+                'label_concat': label2,
                 'id': rel.identity
             }
         }
