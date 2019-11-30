@@ -404,6 +404,13 @@ app.layout = html.Div([
 
 # Update layout
 
+@app.callback(Output('cytoscape', 'elements'),
+                [Input('input-start-date', 'value'),
+                    Input('input-end-date', 'value')],)
+def updateRangedate(start_date, end_date):
+    #Hier volgt functie
+
+
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
 def update_layout(layout):
@@ -428,7 +435,7 @@ def displayFiles(data):
         entry = ""
 
     return result2
-
+'''
 @app.callback(Output('cytoscape', 'elements'),
               [Input('input-start-date', 'value'),
                 Input('input-end-date', 'value'),
@@ -467,6 +474,7 @@ def update_layout2(start_date, end_date, developer, file, filetype):
         d2 = datetime.strptime(end_date, '%d-%m-%Y')
         d2 = d2.date()
     except ValueError:
+ master
         #to do: output that the input is wrong
         d2 = None
         # print("Wrong input d2")
