@@ -30,7 +30,7 @@ from datetime import datetime, date
 DB_URL = 'localhost'
 PORT = 13000
 DB_USER = 'neo4j'
-DB_PWD = 'se'
+DB_PWD = 'letmein'
 
 app = dash.Dash(__name__)
 
@@ -184,46 +184,6 @@ app.layout = html.Div([
 		            {'label': name.capitalize(), 'value': name}
 		            for name in ['grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 		        ]),
-		    dcc.Dropdown(
-		        id='dropdown-slider-day',
-		        value='Select day',
-		        clearable=False,
-		        style={
-		            'height': '6vh',
-					'width': '18vh',
-		            'display' : 'inline-block',
-		        },
-		        options=[
-		            {'label': name.capitalize(), 'value': name}
-		            for name in ['Select day', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
-									'23', '24', '25', '26', '27', '28', '29', '30', '31']
-		        ]),
-		    dcc.Dropdown(
-		        id='dropdown-slider-month',
-		        value='Select month',
-		        clearable=False,
-		        style={
-		            'height': '6vh',
-					'width': '18vh',
-		            'display' : 'inline-block'
-		        },
-		        options=[
-		            {'label': name.capitalize(), 'value': name}
-		            for name in ['Select month', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-		        ]),
-		    dcc.Dropdown(
-		        id='dropdown-slider-year',
-		        value='Select year',
-		        clearable=False,
-		        style={
-		            'height': '6vh',
-					'width': '18vh',
-		            'display' : 'inline-block'
-		        },
-		        options=[
-		            {'label': name.capitalize(), 'value': name}
-		            for name in ['Select year', '2017', '2018', '2019']
-		        ]),
         #DATE INPUT AREA
             dcc.Input(
                 id='input-start-date',
@@ -314,7 +274,7 @@ app.layout = html.Div([
 
     ]),
     #UI TABS
-    html.Div(className='four columns', children=[
+    html.Div(className='two columns', children=[
 
         dcc.Tabs(id='tabs', children=[
 
@@ -337,79 +297,13 @@ app.layout = html.Div([
                     ),
                 ])
             ]),
-            #DEVELOPER
 
-            dcc.Tab(label='Tap Objects', children=[
-
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Object JSON:'),
-                    html.Pre(
-                        id='tap-node-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Object JSON:'),
-                    html.Pre(
-                        id='tap-edge-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ]),
-
-            dcc.Tab(label='Tap Data', children=[
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Data JSON:'),
-                    html.Pre(
-                        id='tap-node-data-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Data JSON:'),
-                    html.Pre(
-                        id='tap-edge-data-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ]),
-            dcc.Tab(label='Mouseover Data', children=[
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Data JSON:'),
-                    html.Pre(
-                        id='mouseover-node-data-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Data JSON:'),
-                    html.Pre(
-                        id='mouseover-edge-data-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ]),
-            dcc.Tab(label='Selected Data', children=[
-                html.Div(style=styles['tab'], children=[
-                    html.P('Node Data JSON:'),
-                    html.Pre(
-                        id='selected-node-data-json-output',
-                        style=styles['json-output']
-                    ),
-                    html.P('Edge Data JSON:'),
-                    html.Pre(
-                        id='selected-edge-data-json-output',
-                        style=styles['json-output']
-                    )
-                ])
-            ])
         ]),
 
     ])
 ])
 
 # Update layout
-
-@app.callback(Output('cytoscape', 'elements'),
-                [Input('input-start-date', 'value'),
-                    Input('input-end-date', 'value')],)
-def updateRangedate(start_date, end_date):
-    #Hier volgt functie
-
 
 @app.callback(Output('cytoscape', 'layout'),
               [Input('dropdown-update-layout', 'value')])
@@ -435,7 +329,7 @@ def displayFiles(data):
         entry = ""
 
     return result2
-'''
+
 @app.callback(Output('cytoscape', 'elements'),
               [Input('input-start-date', 'value'),
                 Input('input-end-date', 'value'),
@@ -474,7 +368,6 @@ def update_layout2(start_date, end_date, developer, file, filetype):
         d2 = datetime.strptime(end_date, '%d-%m-%Y')
         d2 = d2.date()
     except ValueError:
- master
         #to do: output that the input is wrong
         d2 = None
         # print("Wrong input d2")
@@ -483,23 +376,14 @@ def update_layout2(start_date, end_date, developer, file, filetype):
 
     return n + r
 
+@app.callback(Output('all-developers', 'children'),
+              [Input('cytoscape', 'tapNode')])
+def displayDevs(data):
+	dev = developers.Developers(nodes, relations)
+	return dev.print_dev_last(dev.list_dev_ids())
+
 
 #RESET BUTTON CALLBACKS
-
-@app.callback(Output('dropdown-slider-year', 'value'),
-              [Input('reset_button', 'n_clicks')])
-def update_reset(n_clicks):
-        return 'Select year'
-
-@app.callback(Output('dropdown-slider-month', 'value'),
-              [Input('reset_button', 'n_clicks')])
-def update_reset(n_clicks):
-        return 'Select month'
-
-@app.callback(Output('dropdown-slider-day', 'value'),
-              [Input('reset_button', 'n_clicks')])
-def update_reset(n_clicks):
-        return 'Select day'
 
 @app.callback(Output('dropdown-slider-devs', 'value'),
               [Input('reset_button', 'n_clicks')])
@@ -527,59 +411,6 @@ def update_reset(n_clicks):
         return ''
 
 #RESET BUTTON CALLBACKS ^
-
-@app.callback(Output('tap-node-json-output', 'children'),
-              [Input('cytoscape', 'tapNode')])
-def displayTapNode(data):
-    return json.dumps(data, indent=2)
-
-@app.callback(Output('all-developers', 'children'),
-              [Input('cytoscape', 'tapNode')])
-def displayDevs(data):
-	dev = developers.Developers(nodes, relations)
-	return dev.print_dev_last(dev.list_dev_ids())
-
-@app.callback(Output('tap-edge-json-output', 'children'),
-              [Input('cytoscape', 'tapEdge')])
-def displayTapEdge(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('tap-node-data-json-output', 'children'),
-              [Input('cytoscape', 'tapNodeData')])
-def displayTapNodeData(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('tap-edge-data-json-output', 'children'),
-              [Input('cytoscape', 'tapEdgeData')])
-def displayTapEdgeData(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('mouseover-node-data-json-output', 'children'),
-              [Input('cytoscape', 'mouseoverNodeData')])
-def displayMouseoverNodeData(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('mouseover-edge-data-json-output', 'children'),
-              [Input('cytoscape', 'mouseoverEdgeData')])
-def displayMouseoverEdgeData(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('selected-node-data-json-output', 'children'),
-              [Input('cytoscape', 'selectedNodeData')])
-def displaySelectedNodeData(data):
-    return json.dumps(data, indent=2)
-
-
-@app.callback(Output('selected-edge-data-json-output', 'children'),
-              [Input('cytoscape', 'selectedEdgeData')])
-def displaySelectedEdgeData(data):
-    return json.dumps(data, indent=2)
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
