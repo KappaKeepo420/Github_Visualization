@@ -6,7 +6,7 @@ class Filter(metaclass=Singleton):
   def __init__(self, nodes, rels):
     self.nodes = nodes
     self.rels = rels
-    self.file_list = []
+    self.file_nodes = []
     self.full_list = []
     self.rel_list = []
 
@@ -89,18 +89,19 @@ class Filter(metaclass=Singleton):
                   self.full_list.append(z)
 
   def gather_file_branch(self, commit_list):
+
     for x in commit_list:
       for y in self.rels:
         if y['data']['source'] == x and "Commit" in y['data']['label_concat']:
           for z in self.nodes:
             if z['data']['id'] == y['data']['target'] and z['data']['type'] != 'Commit':
               self.rel_list.append(y)
-              if z not in self.file_list:
-                self.file_list.append(z)
+              if z not in self.file_nodes:
+                self.file_nodes.append(z)
                 self.full_list.append(z)
 
   def gather_filetype(self, commit_list):
-    for x in self.file_list:
+    for x in self.file_nodes:
       if x['data']['type'] == 'File':
         for y in self.rels:
           if y['data']['target'] == x['data']['id']:
@@ -158,6 +159,9 @@ class Filter(metaclass=Singleton):
     file_list = []
     filetype_list = []
     date_list = []
+    self.full_list = []
+    self.rel_list = []
+    self.file_nodes = []
     ultralist = []
     result = []
 
@@ -169,9 +173,16 @@ class Filter(metaclass=Singleton):
       ultralist.append(file_list)
     if filetype_id is not None:
       filetype_list = self.filter_filetype(filetype_id)
-      ultralist.append(file_list)
-    if date1 is not None and date2 is not None:
-      date_list = self.valid_commits_date(date1, date2)
+      ultralist.append(filetype_list)
+    if date1 is not None:
+      if date2 is not None:
+        date_list = self.valid_commits_date(date1, date2)
+        ultralist.append(date_list)
+      else:
+        date_list = self.valid_commits_date(date1, date.today())
+        ultralist.append(date_list)
+    elif date2 is not None:
+      date_list = self.valid_commits_date(date(1900,1,1), date2)
       ultralist.append(date_list)
 
     if len(ultralist) != 0:
@@ -182,7 +193,6 @@ class Filter(metaclass=Singleton):
       return self.nodes, self.rels
 
     result = list(result)
-
     self.node_gathering(result)
 
     return self.full_list, self.rel_list
@@ -212,6 +222,18 @@ def commits_per_file(nodes, relations):
 
 def developer_to_id(nodes, developer):
   for x in nodes:
-    if x['data']['type'] == 'Developer' and x['data']['name'] == developer:
+    if x['data']['name'] == developer:
+      return x['data']['id']
+  return None
+
+def file_to_id(nodes, file):
+  for x in nodes:
+    if x['data']['name'] == file:
+      return x['data']['id']
+  return None
+
+def filetype_to_id(nodes, filetype):
+  for x in nodes:
+    if x['data']['name'] == filetype:
       return x['data']['id']
   return None

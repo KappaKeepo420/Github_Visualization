@@ -38,7 +38,7 @@ class Developers(metaclass=Singleton):
         rel = []
 
         for x in self.rels:
-            if (x['data']['label'] == type):
+            if str(type) in x['data']['label_concat']:
                 if (x['data']['source'] == id):
                     for y in self.nodes:
                         if (y['data']['id'] == x['data']['target']):
@@ -141,7 +141,6 @@ class Developers(metaclass=Singleton):
             entry += str(self.dev_last_active(dev))
             entry += "\n"
             result.append(entry)
-            print(entry)
             entry = ""
 
         return result
