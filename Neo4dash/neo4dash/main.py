@@ -51,15 +51,16 @@ fil = files.Files(nodes, relations)
 # dev.print_dev_last(dev.list_dev_ids())
 # dev.show_developers_activity(dev.list_dev_ids())
 
+# makes the developer list in UI 
 devs = ['Select developer']
 devs += dev.list_dev_name()
 
+# makes the file list in UI 
 n_files = ['Select file']
 n_files += fil.list_file_name()
 
 filetypes = ['Select filetype']
 filetypes += fil.list_filetype_name()
-
 
 styles = {
     'json-output': {
